@@ -102,6 +102,12 @@ class Product extends Model
         return $this->belongsToMany(AttributeValue::class, 'product_attribute_value');
     }
 
+    /** Products intentionally related from this product's perspective. */
+    public function related(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'product_related', 'product_id', 'related_product_id');
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);

@@ -21,25 +21,42 @@ class ProductService
         });
     }
 
-    public function update(Product $product, array $data): Product
+    public function update(Product $product, array $data, bool $preservePresentationPrices = false): Product
     {
-        return DB::transaction(function () use ($product, $data): Product {
+        return DB::transaction(function () use ($product, $data, $preservePresentationPrices): Product {
             $product->update($data);
-            $this->syncRelations($product, $data);
+            $this->syncRelations($product, $data, $preservePresentationPrices);
 
             return $product->fresh(['presentations', 'attributeValues', 'images']);
         });
     }
 
-    private function syncRelations(Product $product, array $data): void
+    private function syncRelations(Product $product, array $data, bool $preservePresentationPrices = false): void
     {
         if (array_key_exists('attribute_value_ids', $data)) {
             $product->attributeValues()->sync($data['attribute_value_ids'] ?? []);
         }
 
+        if (array_key_exists('related_product_ids', $data)) {
+            $product->related()->sync($data['related_product_ids'] ?? []);
+        }
+
         if (array_key_exists('presentations', $data)) {
-            $product->presentations()->delete();
-            $product->presentations()->createMany($data['presentations'] ?? []);
+            $presentations = collect($data['presentations'] ?? []);
+            $existingIds = $presentations->pluck('id')->filter()->all();
+            $product->presentations()->whereNotIn('id', $existingIds ?: [0])->delete();
+            $presentations->each(function (array $presentation) use ($product, $preservePresentationPrices): void {
+                $id = $presentation['id'] ?? null;
+                unset($presentation['id']);
+                if ($preservePresentationPrices && $id) {
+                    unset($presentation['price_without_invoice'], $presentation['price_with_invoice']);
+                }
+                if ($id) {
+                    $product->presentations()->whereKey($id)->update($presentation);
+                } else {
+                    $product->presentations()->create($presentation);
+                }
+            });
         }
 
         if (array_key_exists('images', $data)) {

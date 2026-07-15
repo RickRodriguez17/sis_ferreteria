@@ -10,6 +10,11 @@ use App\Livewire\PriceHistoryIndex;
 use App\Livewire\ProductForm;
 use App\Livewire\ProductImport;
 use App\Livewire\ProductIndex;
+use App\Livewire\PurchaseForm;
+use App\Livewire\PurchaseIndex;
+use App\Livewire\PurchaseShow;
+use App\Livewire\ReceptionForm;
+use App\Livewire\SupplierIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -27,6 +32,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('products/create', ProductForm::class)->name('products.create');
     Route::get('products/{product}/edit', ProductForm::class)->name('products.edit');
     Route::get('products/import', ProductImport::class)->name('products.import');
+    Route::get('suppliers', SupplierIndex::class)->name('suppliers.index');
+    Route::get('purchases', PurchaseIndex::class)->name('purchases.index');
+    Route::get('purchases/create', PurchaseForm::class)->name('purchases.create');
+    Route::get('purchases/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');
+    Route::get('purchases/{purchase}', PurchaseShow::class)->name('purchases.show');
+    Route::get('purchases/{purchase}/receptions/create', ReceptionForm::class)->name('receptions.create');
     Route::get('catalog/{type}', CatalogManager::class)->name('catalog.manager');
     Route::redirect('categories', 'catalog/categories')->name('catalog.categories');
     Route::redirect('brands', 'catalog/brands')->name('catalog.brands');

@@ -38,6 +38,10 @@
                             <x-sidebar-link :href="route('inventory.movements')" :active="request()->routeIs('inventory.movements')">Movimientos</x-sidebar-link>
                             <x-sidebar-link :href="route('inventory.prices')" :active="request()->routeIs('inventory.prices')">Historial de precios</x-sidebar-link>
                         </x-sidebar-section>
+                        <x-sidebar-section title="Compras">
+                            @can('viewAny', \App\Models\Supplier::class)<x-sidebar-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.*')">Proveedores</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\Purchase::class)<x-sidebar-link :href="route('purchases.index')" :active="request()->routeIs('purchases.*')">Compras</x-sidebar-link>@endcan
+                        </x-sidebar-section>
                         <x-sidebar-section title="Herramientas">
                             <x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')">Carga masiva</x-sidebar-link>
                         </x-sidebar-section>

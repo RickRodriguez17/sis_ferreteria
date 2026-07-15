@@ -97,6 +97,11 @@ class Product extends Model
         return $this->hasMany(ReceptionItem::class);
     }
 
+    public function costHistories(): HasMany
+    {
+        return $this->hasMany(CostHistory::class);
+    }
+
     public function attributeValues(): BelongsToMany
     {
         return $this->belongsToMany(AttributeValue::class, 'product_attribute_value');

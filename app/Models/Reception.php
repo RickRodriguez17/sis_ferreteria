@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Enums\ReceptionDestination;
 use App\Traits\Auditable;
 use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,11 +14,11 @@ class Reception extends Model
 {
     use Auditable, HasCreator, HasFactory;
 
-    protected $fillable = ['code', 'purchase_id', 'location_id', 'received_at', 'notes', 'created_by', 'updated_by'];
+    protected $fillable = ['code', 'purchase_id', 'location_id', 'destination', 'destination_reference', 'received_at', 'notes', 'created_by', 'updated_by'];
 
     protected function casts(): array
     {
-        return ['received_at' => 'datetime'];
+        return ['destination' => ReceptionDestination::class, 'received_at' => 'datetime'];
     }
 
     /** @return BelongsTo<Purchase, $this> */
@@ -36,6 +37,11 @@ class Reception extends Model
     public function items(): HasMany
     {
         return $this->hasMany(ReceptionItem::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(ReceptionAttachment::class);
     }
 
     public function creator(): BelongsTo

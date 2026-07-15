@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
             ['name' => 'Cajera', 'email' => 'cajera@construir.local', 'role' => 'Cajero'],
         ];
         foreach ($users as $data) {
-            $user = User::updateOrCreate(['email' => $data['email']], ['name' => $data['name'], 'password' => Hash::make('password')]);
+            $user = User::updateOrCreate(['email' => $data['email']], ['name' => $data['name'], 'password' => Hash::make('password'), 'email_verified_at' => now()]);
             $user->syncRoles([$data['role']]);
         }
     }

@@ -67,6 +67,7 @@ class CatalogManager extends Component
         Gate::authorize('create', $this->modelClass());
         $this->resetForm();
         $this->showModal = true;
+        $this->dispatch('open-modal', 'catalog-record');
     }
 
     public function edit(int $id): void
@@ -79,6 +80,7 @@ class CatalogManager extends Component
         $this->isActive = (bool) ($model->is_active ?? true);
         $this->isDefault = (bool) ($model->is_default ?? false);
         $this->showModal = true;
+        $this->dispatch('open-modal', 'catalog-record');
     }
 
     public function save(): void
@@ -105,8 +107,15 @@ class CatalogManager extends Component
         }
         $model->fill($data)->save();
         $this->showModal = false;
+        $this->dispatch('close-modal', 'catalog-record');
         $this->dispatch('toast', message: $this->editingId ? 'Registro actualizado.' : 'Registro creado.');
         $this->resetForm();
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->dispatch('close-modal', 'catalog-record');
     }
 
     public function delete(int $id): void

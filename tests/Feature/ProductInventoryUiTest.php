@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\CatalogManager;
 use App\Livewire\ProductForm;
 use App\Livewire\ProductImport;
 use App\Models\Brand;
@@ -49,6 +50,21 @@ class ProductInventoryUiTest extends TestCase
         $this->assertTrue($product->related->contains($base));
         $this->assertCount(1, $product->images);
         Storage::disk('public')->assertExists($product->images->first()->path);
+    }
+
+    public function test_catalog_creation_opens_and_closes_modal(): void
+    {
+        $component = Livewire::test(CatalogManager::class, ['type' => 'brands'])
+            ->call('create')
+            ->assertSet('showModal', true)
+            ->assertDispatched('open-modal', 'catalog-record')
+            ->set('name', 'Marca UI')
+            ->call('save')
+            ->assertSet('showModal', false)
+            ->assertDispatched('close-modal', 'catalog-record');
+
+        $this->assertDatabaseHas('brands', ['name' => 'Marca UI']);
+        $this->assertNotNull($component);
     }
 
     public function test_product_import_processes_valid_rows_and_reports_invalid_rows(): void

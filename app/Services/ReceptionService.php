@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Domain\Enums\MovementDirection;
+use App\Domain\Enums\PurchaseStatus;
 use App\Domain\Enums\StockMovementType;
 use App\Events\ReceptionPosted;
+use App\Models\CostHistory;
 use App\Models\Product;
 use App\Models\Reception;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +22,9 @@ class ReceptionService
     {
         $result = DB::transaction(function () use ($reception): Reception {
             $reception->load(['items.purchaseItem.purchase', 'items.product', 'location']);
+            if (in_array($reception->purchase->status, [PurchaseStatus::Completed, PurchaseStatus::Cancelled], true)) {
+                throw new \InvalidArgumentException('Completed or cancelled purchases cannot receive goods.');
+            }
             foreach ($reception->items as $item) {
                 $purchaseItem = $item->purchaseItem;
                 $newReceived = bcadd((string) $purchaseItem->quantity_received, (string) $item->quantity, 4);
@@ -29,6 +34,7 @@ class ReceptionService
 
                 $product = Product::query()->lockForUpdate()->findOrFail($item->product_id);
                 $oldTotal = (string) $product->inventories()->sum('quantity');
+                $previousCost = (string) $product->cost;
                 $oldValue = bcmul($oldTotal, (string) $product->cost, 4);
                 $baseQuantity = $item->product_id === $purchaseItem->product_id
                     ? (string) $item->quantity
@@ -48,7 +54,19 @@ class ReceptionService
                 $newTotal = bcadd($oldTotal, $baseQuantity, 4);
                 if (bccomp($newTotal, '0', 4) > 0) {
                     $newValue = bcadd($oldValue, bcmul($baseQuantity, (string) $item->unit_cost, 4), 4);
-                    $product->update(['cost' => bcdiv($newValue, $newTotal, 4)]);
+                    $newCost = bcdiv($newValue, $newTotal, 4);
+                    $product->update(['cost' => $newCost]);
+                    if (bccomp($previousCost, $newCost, 4) !== 0) {
+                        CostHistory::create([
+                            'product_id' => $product->id,
+                            'reception_id' => $reception->id,
+                            'previous_cost' => $previousCost,
+                            'received_unit_cost' => $item->unit_cost,
+                            'new_cost' => $newCost,
+                            'created_by' => auth()->id(),
+                            'created_at' => now(),
+                        ]);
+                    }
                 }
             }
 

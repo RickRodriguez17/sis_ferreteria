@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Purchase extends Model
 {
@@ -44,6 +45,11 @@ class Purchase extends Model
     public function receptions(): HasMany
     {
         return $this->hasMany(Reception::class);
+    }
+
+    public function costHistories(): HasManyThrough
+    {
+        return $this->hasManyThrough(CostHistory::class, Reception::class);
     }
 
     public function creator(): BelongsTo

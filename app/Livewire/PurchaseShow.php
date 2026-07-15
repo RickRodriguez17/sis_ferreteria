@@ -54,7 +54,7 @@ class PurchaseShow extends Component
         }
     }
 
-    public function updatedProductMargins(int|string $productId): void
+    public function updatedProductMargins(mixed $value, int|string $productId): void
     {
         $this->validateOnly("productMargins.{$productId}", ["productMargins.{$productId}" => ['required', 'numeric', 'min:0', 'max:10']]);
     }

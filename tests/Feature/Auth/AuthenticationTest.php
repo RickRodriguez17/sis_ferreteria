@@ -20,6 +20,11 @@ class AuthenticationTest extends TestCase
             ->assertSeeVolt('pages.auth.login');
     }
 
+    public function test_root_redirects_to_login(): void
+    {
+        $this->get('/')->assertRedirect('/login');
+    }
+
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();
@@ -65,6 +70,16 @@ class AuthenticationTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeVolt('layout.navigation');
+    }
+
+    public function test_unverified_users_can_access_dashboard(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertDontSee('/verify-email');
     }
 
     public function test_users_can_logout(): void

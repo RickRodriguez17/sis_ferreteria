@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
 use App\Services\ProductService;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -32,16 +31,6 @@ class ProductsImport
         $headings = $this->normalizeHeadings(array_shift($rows) ?? []);
         $this->processRows($rows, $headings);
         $spreadsheet->disconnectWorksheets();
-    }
-
-    public function collection(Collection $rows): void
-    {
-        $firstRow = $rows->first();
-        $headings = $this->normalizeHeadings($firstRow instanceof Collection ? $firstRow->keys()->all() : []);
-        $values = $rows->map(
-            fn (mixed $row): array => $row instanceof Collection ? array_values($row->all()) : array_values((array) $row)
-        )->all();
-        $this->processRows($values, $headings);
     }
 
     /**

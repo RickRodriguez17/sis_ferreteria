@@ -7,12 +7,10 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
 use App\Services\ProductService;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class ProductsImport implements ToCollection, WithHeadingRow
+class ProductsImport
 {
     public array $errors = [];
 
@@ -24,11 +22,26 @@ class ProductsImport implements ToCollection, WithHeadingRow
 
     public function __construct(private readonly ProductService $products) {}
 
-    public function collection(Collection $rows): void
+    public function import(string $path): void
+    {
+        $reader = IOFactory::createReaderForFile($path);
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($path);
+        $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, false);
+        $headings = $this->normalizeHeadings(array_shift($rows) ?? []);
+        $this->processRows($rows, $headings);
+        $spreadsheet->disconnectWorksheets();
+    }
+
+    /**
+     * @param  array<int, array<int, mixed>>  $rows
+     * @param  array<int, string>  $headings
+     */
+    private function processRows(array $rows, array $headings): void
     {
         foreach ($rows as $offset => $row) {
             $line = $offset + 2;
-            $data = $row->toArray();
+            $data = array_combine($headings, array_pad($row, count($headings), null)) ?: [];
             $validator = Validator::make($data, ['name' => ['required', 'string'], 'category' => ['required', 'string'], 'brand' => ['required', 'string'], 'unit' => ['required', 'string'], 'presentation_name' => ['required', 'string'], 'equivalence' => ['required', 'numeric', 'gt:0'], 'price_without_invoice' => ['required', 'numeric', 'min:0'], 'price_with_invoice' => ['required', 'numeric', 'min:0']]);
             if ($validator->fails()) {
                 $this->errors[$line] = $validator->errors()->all();
@@ -48,5 +61,17 @@ class ProductsImport implements ToCollection, WithHeadingRow
                 $this->errors[$line] = [$exception->getMessage()];
             }
         }
+    }
+
+    /**
+     * @param  array<int, mixed>  $headings
+     * @return array<int, string>
+     */
+    private function normalizeHeadings(array $headings): array
+    {
+        return array_map(
+            fn (mixed $heading): string => (string) preg_replace('/\s+/', '_', strtolower(trim((string) $heading))),
+            $headings
+        );
     }
 }

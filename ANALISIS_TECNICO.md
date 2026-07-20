@@ -1,7 +1,7 @@
 # Análisis Técnico / Arquitectura — ERP "Construir a tu Alcance"
 
 > Documento CTO-level. **Diseño previo a la programación.** No contiene código de aplicación.
-> Stack objetivo: **Laravel 12 · PHP 8.4 · MySQL 8 · Livewire 3 · TailwindCSS 3 · Spatie Permission · Laravel Policy · Storage · Queue**.
+> Stack objetivo: **Laravel 12 · PHP 8.5 · MySQL 8 · Livewire 3 · TailwindCSS 3 · Spatie Permission · Laravel Policy · Storage · Queue**.
 > Complementa a `PLAN_ARQUITECTURA.md` (modelo ER detallado y plan por fases). Aquí se profundiza en las 17 áreas solicitadas.
 
 ## Índice
@@ -183,7 +183,7 @@ Regla dura: **un componente Livewire no abre transacciones ni contiene reglas de
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `refactor:`); ramas `feature/fase-X-modulo`.
 - **Tests** en flujos críticos (no cobertura 100%): recepción actualiza stock, venta con lock, cobro reduce crédito, arqueo cuadra, autorización por rol.
 - **Pre-commit hooks**: Pint + PHPStan + tests rápidos.
-- **CI** (GitHub Actions): setup PHP 8.4, `composer install`, migraciones sobre MySQL/sqlite, Pint `--test`, PHPStan, PHPUnit/Pest.
+- **CI** (GitHub Actions): setup PHP 8.5, `composer install`, migraciones sobre MySQL/sqlite, Pint `--test`, PHPStan, PHPUnit/Pest.
 
 ---
 
@@ -270,7 +270,7 @@ Regla dura: **un componente Livewire no abre transacciones ni contiene reglas de
 | R6 | Estados de compra mal recalculados (multi-recepción) | Recalculo transaccional comparando ordenado vs recibido. |
 | R7 | Permisos exponen costos/precios | Policies + ocultar columnas de costo por permiso; tests por rol. |
 | R8 | Borrado de catálogo con historial | SoftDeletes + `restrictOnDelete`. |
-| R9 | PHP 8.4 / Laravel 12 muy nuevos → paquetes incompatibles | Fijar versiones verificadas de Livewire 3 y Spatie; validar en Fase 0. |
+| R9 | PHP 8.5 / Laravel 12 muy nuevos → paquetes incompatibles | Fijar versiones verificadas de Livewire 3 y Spatie; validar en Fase 0. |
 | R10 | Auditoría pesada por request | Vía eventos + `ShouldQueue` al activar cola; solo entidades marcadas. |
 | R11 | Crecimiento de `stock_movements`/`audits` | Índices adecuados; particionado/archivado a futuro (§10). |
 | R12 | Impresión (drivers de impresora térmica) | Generar PDF/HTML imprimible; impresión térmica ESC/POS como fase opcional (§16). |

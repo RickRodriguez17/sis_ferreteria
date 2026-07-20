@@ -1,7 +1,7 @@
 # Plan de Arquitectura — ERP "Construir a tu Alcance"
 
 > Documento de diseño previo a la programación.
-> Stack: **Laravel 12 · PHP 8.4 · MySQL · Livewire 3 · TailwindCSS · Spatie Permission · Policies · Storage · Queue**.
+> Stack: **Laravel 12 · PHP 8.5 · MySQL · Livewire 3 · TailwindCSS · Spatie Permission · Policies · Storage · Queue**.
 > Enfoque: ERP especializado en **control de inventario** para ferretería, no un POS genérico.
 
 ---
@@ -290,7 +290,7 @@ Puntos destacados:
 | R8 | **Borrado de catálogos con historial** | Rotura de integridad referencial | SoftDeletes en catálogos; `restrictOnDelete` cuando hay documentos asociados. |
 | R9 | **Auditoría pesada** en cada request | Rendimiento | Auditoría vía eventos, `ShouldQueue` cuando se active la cola; solo entidades marcadas. |
 | R10 | **Estados de compra** mal recalculados con múltiples recepciones | Compras "completas" con faltantes | `PurchaseService` recalcula `status` comparando `quantity_ordered` vs `quantity_received` sumado, en transacción. |
-| R11 | **PHP 8.4 / Laravel 12 muy nuevos** — compatibilidad de paquetes | Instalación falla | Fijar versiones compatibles; verificar Livewire 3 y Spatie soportan 8.4; documentar en composer. |
+| R11 | **PHP 8.5 / Laravel 12 muy nuevos** — compatibilidad de paquetes | Instalación falla | Fijar versiones compatibles; verificar Livewire 3 y Spatie soportan 8.5; documentar en composer. |
 
 ---
 

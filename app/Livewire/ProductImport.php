@@ -8,7 +8,6 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ProductImport extends Component
 {
@@ -22,7 +21,7 @@ class ProductImport extends Component
     {
         Gate::authorize('viewAny', Product::class);
 
-        return Excel::download(new ProductTemplateExport, 'plantilla-productos.xlsx');
+        return (new ProductTemplateExport)->download('plantilla-productos.xlsx');
     }
 
     public function import(): void
@@ -30,7 +29,7 @@ class ProductImport extends Component
         Gate::authorize('create', Product::class);
         $this->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240']]);
         $import = app(ProductsImport::class);
-        Excel::import($import, $this->file->getRealPath());
+        $import->import((string) $this->file->getRealPath());
         $this->result = ['processed' => $import->processed, 'created' => $import->created, 'updated' => $import->updated, 'errors' => $import->errors];
         $this->reset('file');
     }

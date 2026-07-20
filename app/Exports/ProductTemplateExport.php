@@ -2,10 +2,11 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromArray;
-use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ProductTemplateExport implements FromArray, WithHeadings
+class ProductTemplateExport
 {
     public function headings(): array
     {
@@ -15,5 +16,16 @@ class ProductTemplateExport implements FromArray, WithHeadings
     public function array(): array
     {
         return [['', '', 'Martillo demo', 'Descripción', 'Herramientas', 'Truper', 'und', 2, 10, 1, 'Unidad', 1, 15, 17]];
+    }
+
+    public function download(string $filename): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet;
+        $spreadsheet->getActiveSheet()->fromArray([$this->headings(), ...$this->array()]);
+
+        return response()->streamDownload(function () use ($spreadsheet): void {
+            (new Xlsx($spreadsheet))->save('php://output');
+            $spreadsheet->disconnectWorksheets();
+        }, $filename, ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
 }

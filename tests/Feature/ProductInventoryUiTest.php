@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exports\ProductTemplateExport;
 use App\Livewire\CatalogManager;
 use App\Livewire\ProductForm;
 use App\Livewire\ProductImport;
@@ -14,6 +15,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Tests\TestCase;
 
 class ProductInventoryUiTest extends TestCase
@@ -69,20 +73,44 @@ class ProductInventoryUiTest extends TestCase
 
     public function test_product_import_processes_valid_rows_and_reports_invalid_rows(): void
     {
-        $csv = implode(PHP_EOL, [
-            'code,barcode,name,description,category,brand,unit,min_stock,cost,is_active,presentation_name,equivalence,price_without_invoice,price_with_invoice',
-            ',IMPORT-001,Importado válido,Demo,Herramientas,Truper,und,2,10,1,Unidad,1,15,17',
-            ',IMPORT-002,,,,,,,,1,Unidad,1,15,17',
+        $path = tempnam(sys_get_temp_dir(), 'products-import-');
+        $spreadsheet = new Spreadsheet;
+        $spreadsheet->getActiveSheet()->fromArray([
+            ['code', 'barcode', 'name', 'description', 'category', 'brand', 'unit', 'min_stock', 'cost', 'is_active', 'presentation_name', 'equivalence', 'price_without_invoice', 'price_with_invoice'],
+            ['', 'IMPORT-001', 'Importado válido', 'Demo', 'Herramientas', 'Truper', 'und', 2, 10, 1, 'Unidad', 1, 15, 17],
+            ['', 'IMPORT-002', '', '', '', '', '', '', '', 1, 'Unidad', 1, 15, 17],
         ]);
+        (new Xlsx($spreadsheet))->save($path);
+        $spreadsheet->disconnectWorksheets();
+        $contents = file_get_contents($path);
+        unlink($path);
 
         $component = Livewire::test(ProductImport::class)
-            ->set('file', UploadedFile::fake()->createWithContent('productos.csv', $csv))
+            ->set('file', UploadedFile::fake()->createWithContent('productos.xlsx', $contents))
             ->call('import')
             ->assertSet('result.processed', 1)
             ->assertSet('result.created', 1);
 
         $this->assertDatabaseHas('products', ['barcode' => 'IMPORT-001', 'name' => 'Importado válido']);
         $this->assertCount(1, $component->get('result')['errors']);
+    }
+
+    public function test_product_template_download_contains_expected_xlsx_columns(): void
+    {
+        $response = (new ProductTemplateExport)->download('plantilla-productos.xlsx');
+
+        ob_start();
+        $response->sendContent();
+        $contents = ob_get_clean();
+
+        $this->assertIsString($contents);
+        $path = tempnam(sys_get_temp_dir(), 'products-template-');
+        file_put_contents($path, $contents);
+        $spreadsheet = IOFactory::load($path);
+        $this->assertSame('code', $spreadsheet->getActiveSheet()->getCell('A1')->getValue());
+        $this->assertSame('price_with_invoice', $spreadsheet->getActiveSheet()->getCell('N1')->getValue());
+        $spreadsheet->disconnectWorksheets();
+        unlink($path);
     }
 
     public function test_inventory_routes_require_authentication(): void

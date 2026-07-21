@@ -1,6 +1,9 @@
 <?php
 
 use App\Livewire\CatalogManager;
+use App\Livewire\CustomerForm;
+use App\Livewire\CustomerIndex;
+use App\Livewire\CustomerShow;
 use App\Livewire\InventoryAdjust;
 use App\Livewire\InventoryIndex;
 use App\Livewire\InventoryMovements;
@@ -33,6 +36,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('products/{product}/edit', ProductForm::class)->name('products.edit');
     Route::get('products/import', ProductImport::class)->name('products.import');
     Route::get('suppliers', SupplierIndex::class)->name('suppliers.index');
+    Route::get('customers', CustomerIndex::class)->name('customers.index');
+    Route::get('customers/create', CustomerForm::class)->name('customers.create');
+    Route::get('customers/{customer}/edit', CustomerForm::class)->name('customers.edit');
+    Route::get('customers/{customer}', CustomerShow::class)->name('customers.show');
     Route::get('purchases', PurchaseIndex::class)->name('purchases.index');
     Route::get('purchases/create', PurchaseForm::class)->name('purchases.create');
     Route::get('purchases/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');

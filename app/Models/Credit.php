@@ -40,12 +40,15 @@ class Credit extends Model
 
     protected function isOverdue(): Attribute
     {
-        return Attribute::get(fn (): bool => $this->status === CreditStatus::Overdue
-            || ($this->balance > 0 && $this->due_date instanceof Carbon && $this->due_date->isPast()));
+        return Attribute::get(fn (): bool => $this->status !== CreditStatus::Cancelled
+            && ($this->status === CreditStatus::Overdue
+                || ($this->balance > 0 && $this->due_date instanceof Carbon && $this->due_date->isPast())));
     }
 
     public function scopeOverdue($query)
     {
-        return $query->where('status', CreditStatus::Overdue)->orWhere(fn ($q) => $q->where('balance', '>', 0)->whereDate('due_date', '<', now()));
+        return $query->where('status', '!=', CreditStatus::Cancelled)
+            ->where(fn ($q) => $q->where('status', CreditStatus::Overdue)
+                ->orWhere(fn ($q) => $q->where('balance', '>', 0)->whereDate('due_date', '<', now())));
     }
 }

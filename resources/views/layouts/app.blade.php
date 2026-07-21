@@ -46,6 +46,7 @@
                             @can('viewAny', \App\Models\Customer::class)<x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">Clientes</x-sidebar-link>@endcan
                             @can('viewAny', \App\Models\Sale::class)<x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">Ventas</x-sidebar-link>@endcan
                             @can('viewAny', \App\Models\Quotation::class)<x-sidebar-link :href="route('quotations.index')" :active="request()->routeIs('quotations.*')">Cotizaciones</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\Credit::class)<x-sidebar-link :href="route('credits.index')" :active="request()->routeIs('credits.*')">Créditos</x-sidebar-link>@endcan
                         </x-sidebar-section>
                         <x-sidebar-section title="Herramientas">
                             <x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')">Carga masiva</x-sidebar-link>

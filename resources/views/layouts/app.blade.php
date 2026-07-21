@@ -54,6 +54,7 @@
                         </x-sidebar-section>
                         <x-sidebar-section title="Herramientas">
                             <x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')">Carga masiva</x-sidebar-link>
+                            @can('reports.view')<x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reportes</x-sidebar-link>@endcan
                         </x-sidebar-section>
                     </nav>
                 </aside>

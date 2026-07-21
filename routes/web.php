@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\DocumentPdfController;
+use App\Livewire\CashRegisterPanel;
+use App\Livewire\CashSessionIndex;
+use App\Livewire\CashSessionShow;
 use App\Livewire\CatalogManager;
 use App\Livewire\CreditIndex;
 use App\Livewire\CreditShow;
@@ -12,6 +15,7 @@ use App\Livewire\InventoryIndex;
 use App\Livewire\InventoryMovements;
 use App\Livewire\InventoryTransfer;
 use App\Livewire\KardexIndex;
+use App\Livewire\PaymentAccountIndex;
 use App\Livewire\PriceHistoryIndex;
 use App\Livewire\ProductForm;
 use App\Livewire\ProductImport;
@@ -60,6 +64,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('quotations/{quotation}/pdf', [DocumentPdfController::class, 'quotation'])->name('quotations.pdf');
     Route::get('credits', CreditIndex::class)->name('credits.index');
     Route::get('credits/{credit}', CreditShow::class)->name('credits.show');
+    Route::get('cash', CashRegisterPanel::class)->name('cash.index');
+    Route::get('cash/sessions', CashSessionIndex::class)->name('cash.sessions.index');
+    Route::get('cash/sessions/{session}', CashSessionShow::class)->name('cash.sessions.show');
+    Route::get('cash/payment-accounts', PaymentAccountIndex::class)->name('cash.payment-accounts.index');
     Route::get('purchases', PurchaseIndex::class)->name('purchases.index');
     Route::get('purchases/create', PurchaseForm::class)->name('purchases.create');
     Route::get('purchases/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');

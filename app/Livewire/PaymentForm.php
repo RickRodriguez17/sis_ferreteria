@@ -6,6 +6,7 @@ use App\Domain\Enums\PaymentMethod;
 use App\Models\CashSession;
 use App\Models\Credit;
 use App\Models\CreditPayment;
+use App\Models\PaymentAccount;
 use App\Services\CreditService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +26,8 @@ class PaymentForm extends Component
 
     public string $notes = '';
 
+    public string $accountId = '';
+
     public function mount(?Credit $credit = null): void
     {
         $this->credit = $credit;
@@ -42,6 +45,7 @@ class PaymentForm extends Component
         $this->method = PaymentMethod::Cash->value;
         $this->paidAt = now()->format('Y-m-d\TH:i');
         $this->notes = '';
+        $this->accountId = '';
         $this->dispatch('open-modal', 'credit-payment');
     }
 
@@ -53,6 +57,7 @@ class PaymentForm extends Component
             'method' => ['required', 'in:cash,qr,transfer'],
             'paidAt' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'accountId' => ['nullable', 'integer', 'exists:payment_accounts,id'],
         ], [], [
             'amount' => 'monto',
             'method' => 'forma de pago',
@@ -67,6 +72,12 @@ class PaymentForm extends Component
         }
 
         $cashSession = CashSession::query()->open()->latest('opened_at')->first();
+        $account = $this->method !== PaymentMethod::Cash->value && $this->accountId !== '' ? PaymentAccount::query()->active()->find($this->accountId) : null;
+        if ($this->method !== PaymentMethod::Cash->value && ! $account) {
+            $this->addError('accountId', 'Selecciona una cuenta activa para este método de pago.');
+
+            return;
+        }
 
         try {
             $service->registerPayment(
@@ -76,6 +87,7 @@ class PaymentForm extends Component
                 $cashSession,
                 $this->notes !== '' ? $this->notes : null,
                 Carbon::parse($this->paidAt),
+                $account,
             );
             $this->dispatch('payment-registered', creditId: $this->credit->id);
             $this->dispatch('close-modal', 'credit-payment');

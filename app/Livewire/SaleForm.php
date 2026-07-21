@@ -8,6 +8,7 @@ use App\Livewire\Traits\WithTableState;
 use App\Models\Customer;
 use App\Models\Inventory;
 use App\Models\Location;
+use App\Models\PaymentAccount;
 use App\Models\Presentation;
 use App\Models\Product;
 use App\Models\Sale;
@@ -34,6 +35,8 @@ class SaleForm extends Component
     public string $paymentType = 'cash';
 
     public string $paymentMethod = 'cash';
+
+    public string $paymentAccountId = '';
 
     public string $discount = '0';
 
@@ -119,6 +122,7 @@ class SaleForm extends Component
             'customerId' => ['nullable', 'exists:customers,id'],
             'paymentType' => ['required', 'in:cash,credit,mixed'],
             'paymentMethod' => ['required', 'in:cash,qr,transfer'],
+            'paymentAccountId' => ['nullable', 'integer', 'exists:payment_accounts,id'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
@@ -138,6 +142,14 @@ class SaleForm extends Component
 
             return;
         }
+        $paymentAccount = $this->paymentMethod !== 'cash' && $this->paymentAccountId !== ''
+            ? PaymentAccount::query()->active()->find($this->paymentAccountId)
+            : null;
+        if ($this->paymentMethod !== 'cash' && ! $paymentAccount) {
+            $this->addError('paymentAccountId', 'Debe seleccionar una cuenta activa para este método de pago.');
+
+            return;
+        }
 
         $items = array_map(fn (array $item): array => [
             'product_id' => $item['product_id'],
@@ -154,6 +166,7 @@ class SaleForm extends Component
                 'with_invoice' => $this->withInvoice,
                 'payment_type' => $this->paymentType,
                 'payment_method' => $this->paymentMethod,
+                'payment_account_id' => $paymentAccount?->id,
                 'subtotal' => $subtotal,
                 'discount' => $this->discount,
                 'total' => max(0, (float) $subtotal - (float) $this->discount),
@@ -182,6 +195,10 @@ class SaleForm extends Component
         $products = Product::query()->active()->with('presentations')->when($this->productSearch !== '', fn ($query) => $query->search($this->productSearch))->orderBy('name')->limit(20)->get();
         $customers = Customer::query()->active()->when($this->customerSearch !== '', fn ($query) => $query->where(fn ($q) => $q->where('name', 'like', '%'.$this->customerSearch.'%')->orWhere('document_number', 'like', '%'.$this->customerSearch.'%')->orWhere('phone', 'like', '%'.$this->customerSearch.'%')))->orderBy('name')->limit(15)->get();
         $locations = Location::query()->active()->orderBy('name')->get();
+        $paymentAccounts = PaymentAccount::query()->active()
+            ->when($this->paymentMethod === 'qr', fn ($query) => $query->where('type', 'qr'))
+            ->when($this->paymentMethod === 'transfer', fn ($query) => $query->whereIn('type', ['transfer', 'bank']))
+            ->orderBy('name')->get();
         $productIds = collect($this->items)->pluck('product_id')->filter();
         $stocks = Inventory::query()->whereIn('product_id', $productIds)->where('location_id', $this->locationId ?: 0)->pluck('quantity', 'product_id');
         $lineStocks = collect($this->items)->mapWithKeys(function (array $item, int $index) use ($stocks): array {
@@ -191,7 +208,7 @@ class SaleForm extends Component
             return [$index => $equivalence > 0 ? (float) ($stocks[$item['product_id']] ?? 0) / $equivalence : 0];
         });
 
-        return view('livewire.sale-form', compact('products', 'customers', 'locations', 'stocks', 'lineStocks'))->layout('layouts.app');
+        return view('livewire.sale-form', compact('products', 'customers', 'locations', 'stocks', 'lineStocks', 'paymentAccounts'))->layout('layouts.app');
     }
 
     private function recalculate(): void

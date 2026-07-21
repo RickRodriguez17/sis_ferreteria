@@ -13,6 +13,7 @@ use App\Models\CashSession;
 use App\Models\Credit;
 use App\Models\CreditPayment;
 use App\Models\Customer;
+use App\Models\PaymentAccount;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -23,9 +24,9 @@ class CreditService
         return (string) $customer->credits()->sum('balance');
     }
 
-    public function registerPayment(Credit $credit, float|int|string $amount, PaymentMethod|string $method, ?CashSession $cashSession = null, ?string $notes = null, ?Carbon $paidAt = null): CreditPayment
+    public function registerPayment(Credit $credit, float|int|string $amount, PaymentMethod|string $method, ?CashSession $cashSession = null, ?string $notes = null, ?Carbon $paidAt = null, ?PaymentAccount $account = null): CreditPayment
     {
-        $payment = DB::transaction(function () use ($credit, $amount, $method, $cashSession, $notes, $paidAt): CreditPayment {
+        $payment = DB::transaction(function () use ($credit, $amount, $method, $cashSession, $notes, $paidAt, $account): CreditPayment {
             $credit = Credit::query()->lockForUpdate()->findOrFail($credit->id);
             if ($credit->status === CreditStatus::Cancelled) {
                 throw new \InvalidArgumentException('No se puede registrar un cobro sobre un crédito anulado.');
@@ -42,7 +43,7 @@ class CreditService
             $credit->update(['paid_amount' => $paid, 'balance' => $balance, 'status' => bccomp($balance, '0', 2) === 0 ? CreditStatus::Paid : CreditStatus::Partial]);
             $payment = $credit->payments()->create(['amount' => $amount, 'method' => $method, 'cash_session_id' => $cashSession?->id, 'paid_at' => $paidAt ?? now(), 'notes' => $notes, 'created_by' => auth()->id()]);
             if ($cashSession) {
-                CashMovement::create(['cash_session_id' => $cashSession->id, 'type' => CashMovementType::CreditPayment, 'method' => $method, 'amount' => $amount, 'reference_type' => $payment->getMorphClass(), 'reference_id' => $payment->id, 'created_by' => auth()->id()]);
+                CashMovement::create(['cash_session_id' => $cashSession->id, 'type' => CashMovementType::CreditPayment, 'method' => $method, 'payment_account_id' => $account?->id, 'amount' => $amount, 'reference_type' => $payment->getMorphClass(), 'reference_id' => $payment->id, 'created_by' => auth()->id()]);
             }
 
             return $payment;

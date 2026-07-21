@@ -12,6 +12,7 @@ use App\Models\CashRegister;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Location;
+use App\Models\PaymentAccount;
 use App\Models\Product;
 use App\Models\Reception;
 use App\Models\Sale;
@@ -71,6 +72,8 @@ class DemoSeeder extends Seeder
         $registered = Customer::firstOrCreate(['email' => 'cliente@construir.local'], ['type' => 'registered', 'name' => 'Cliente Registrado', 'credit_limit' => 1000, 'is_active' => true]);
         Customer::firstOrCreate(['email' => 'ocasional@construir.local'], ['type' => 'occasional', 'name' => 'Cliente Ocasional', 'is_active' => true]);
         $register = CashRegister::firstOrCreate(['name' => 'Caja Principal'], ['is_active' => true]);
+        PaymentAccount::firstOrCreate(['name' => 'QR Principal'], ['type' => 'qr', 'details' => 'QR-DEMO-001', 'is_active' => true]);
+        PaymentAccount::firstOrCreate(['name' => 'Transferencia Principal'], ['type' => 'transfer', 'details' => 'CTA-DEMO-001', 'is_active' => true]);
         $cash = app(CashService::class)->open($register, 500);
         $saleService = app(SaleService::class);
 

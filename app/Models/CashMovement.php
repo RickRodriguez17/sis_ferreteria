@@ -14,7 +14,7 @@ class CashMovement extends Model
 {
     use HasFactory, Immutable;
 
-    protected $fillable = ['cash_session_id', 'type', 'method', 'amount', 'reference_type', 'reference_id', 'description', 'created_by'];
+    protected $fillable = ['cash_session_id', 'type', 'method', 'payment_account_id', 'amount', 'reference_type', 'reference_id', 'description', 'created_by'];
 
     protected function casts(): array
     {
@@ -24,6 +24,11 @@ class CashMovement extends Model
     public function cashSession(): BelongsTo
     {
         return $this->belongsTo(CashSession::class);
+    }
+
+    public function paymentAccount(): BelongsTo
+    {
+        return $this->belongsTo(PaymentAccount::class);
     }
 
     public function reference(): MorphTo

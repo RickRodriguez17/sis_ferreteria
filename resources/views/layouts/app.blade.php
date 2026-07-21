@@ -48,6 +48,10 @@
                             @can('viewAny', \App\Models\Quotation::class)<x-sidebar-link :href="route('quotations.index')" :active="request()->routeIs('quotations.*')">Cotizaciones</x-sidebar-link>@endcan
                             @can('viewAny', \App\Models\Credit::class)<x-sidebar-link :href="route('credits.index')" :active="request()->routeIs('credits.*')">Créditos</x-sidebar-link>@endcan
                         </x-sidebar-section>
+                        <x-sidebar-section title="Caja">
+                            @can('viewAny', \App\Models\CashSession::class)<x-sidebar-link :href="route('cash.index')" :active="request()->routeIs('cash.index')">Caja</x-sidebar-link><x-sidebar-link :href="route('cash.sessions.index')" :active="request()->routeIs('cash.sessions.*')">Historial de caja</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\PaymentAccount::class)<x-sidebar-link :href="route('cash.payment-accounts.index')" :active="request()->routeIs('cash.payment-accounts.*')">Cuentas de cobro</x-sidebar-link>@endcan
+                        </x-sidebar-section>
                         <x-sidebar-section title="Herramientas">
                             <x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')">Carga masiva</x-sidebar-link>
                         </x-sidebar-section>

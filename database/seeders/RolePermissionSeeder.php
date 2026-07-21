@@ -27,7 +27,7 @@ class RolePermissionSeeder extends Seeder
         $all = Permission::all();
         Role::findOrCreate('Administrador')->syncPermissions($all);
         Role::findOrCreate('Gerente')->syncPermissions($all->whereNotIn('name', ['settings.update', 'users.delete', 'roles.delete']));
-        Role::findOrCreate('Vendedor')->syncPermissions(Permission::whereIn('name', ['products.view', 'inventory.view', 'customers.view', 'customers.create', 'sales.view', 'sales.create', 'quotations.view', 'quotations.create', 'credits.view', 'payments.view', 'payments.create', 'reports.view'])->get());
+        Role::findOrCreate('Vendedor')->syncPermissions(Permission::whereIn('name', ['products.view', 'inventory.view', 'customers.view', 'customers.create', 'customers.update', 'sales.view', 'sales.create', 'quotations.view', 'quotations.create', 'credits.view', 'payments.view', 'payments.create', 'reports.view'])->get());
         Role::findOrCreate('Almacenero')->syncPermissions(Permission::whereIn('name', ['products.view', 'products.create', 'products.update', 'inventory.view', 'inventory.adjust', 'inventory.transfer', 'purchases.view', 'suppliers.view', 'receptions.view', 'receptions.create', 'receptions.update', 'receptions.delete'])->get());
         Role::findOrCreate('Cajero')->syncPermissions(Permission::whereIn('name', ['products.view', 'inventory.view', 'sales.view', 'sales.create', 'credits.view', 'payments.view', 'payments.create', 'cash.open', 'cash.close', 'cash.movement'])->get());
     }

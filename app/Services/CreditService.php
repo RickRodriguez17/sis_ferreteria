@@ -12,10 +12,16 @@ use App\Models\CashMovement;
 use App\Models\CashSession;
 use App\Models\Credit;
 use App\Models\CreditPayment;
+use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 
 class CreditService
 {
+    public function outstandingBalance(Customer $customer): string
+    {
+        return (string) $customer->credits()->sum('balance');
+    }
+
     public function registerPayment(Credit $credit, float|int|string $amount, PaymentMethod|string $method, ?CashSession $cashSession = null): CreditPayment
     {
         $payment = DB::transaction(function () use ($credit, $amount, $method, $cashSession): CreditPayment {

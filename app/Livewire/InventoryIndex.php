@@ -12,6 +12,11 @@ class InventoryIndex extends Component
 
     public bool $belowMinimum = false;
 
+    public function mount(): void
+    {
+        abort_unless(auth()->user()?->can('inventory.view'), 403);
+    }
+
     public function render(InventoryRepository $repository)
     {
         $items = $this->belowMinimum ? $repository->belowMinimum() : $repository->byLocation($this->locationId !== '' ? (int) $this->locationId : null);

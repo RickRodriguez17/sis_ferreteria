@@ -32,6 +32,11 @@ class SupplierIndex extends Component
 
     public bool $isActive = true;
 
+    public function mount(): void
+    {
+        Gate::authorize('viewAny', Supplier::class);
+    }
+
     public function create(): void
     {
         Gate::authorize('create', Supplier::class);

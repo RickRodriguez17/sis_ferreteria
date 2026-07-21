@@ -120,6 +120,16 @@ class ProductInventoryUiTest extends TestCase
         $this->get(route('inventory.index'))->assertRedirect(route('login'));
     }
 
+    public function test_cashier_cannot_open_catalog_management_pages(): void
+    {
+        $cashier = User::factory()->create();
+        $cashier->assignRole('Cajero');
+        $this->actingAs($cashier);
+
+        $this->get(route('catalog.manager', ['type' => 'brands']))->assertForbidden();
+        $this->get(route('suppliers.index'))->assertForbidden();
+    }
+
     public function test_authenticated_module_pages_render(): void
     {
         foreach ([

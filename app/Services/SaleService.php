@@ -12,8 +12,11 @@ use App\Domain\Enums\StockMovementType;
 use App\Events\SaleConfirmed;
 use App\Exceptions\CreditLimitExceededException;
 use App\Models\CashMovement;
+use App\Models\CashSession;
 use App\Models\Credit;
+use App\Models\PaymentAccount;
 use App\Models\Sale;
+use App\Services\Support\CodeGenerator;
 use App\Services\Support\UnitConverter;
 use Illuminate\Support\Facades\DB;
 
@@ -22,11 +25,42 @@ class SaleService
     public function __construct(
         private readonly InventoryService $inventory,
         private readonly UnitConverter $converter,
+        private readonly CodeGenerator $codes,
     ) {}
 
-    public function confirm(Sale $sale): Sale
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    public function register(array $data, array $items): Sale
     {
-        $result = DB::transaction(function () use ($sale): Sale {
+        return DB::transaction(function () use ($data, $items): Sale {
+            $paymentMethod = $data['payment_method'] ?? PaymentMethod::Cash;
+            $paymentAccount = isset($data['payment_account_id']) ? PaymentAccount::find($data['payment_account_id']) : null;
+            unset($data['payment_account_id']);
+            unset($data['payment_method']);
+            $data['code'] ??= $this->codes->document('sale');
+            $data['status'] ??= SaleStatus::Completed;
+            $data['subtotal'] ??= collect($items)->sum('subtotal');
+            $data['discount'] ??= 0;
+            $data['total'] ??= max(0, (float) $data['subtotal'] - (float) $data['discount']);
+
+            if (($data['cash_session_id'] ?? null) === null
+                && in_array($data['payment_type'] ?? null, [PaymentType::Cash->value, PaymentType::Mixed->value], true)) {
+                $data['cash_session_id'] = CashSession::query()->open()->latest('opened_at')->value('id');
+            }
+
+            unset($data['items']);
+            $sale = Sale::create($data);
+            $sale->items()->createMany($items);
+
+            return $this->confirm($sale, $paymentMethod, $paymentAccount);
+        });
+    }
+
+    public function confirm(Sale $sale, PaymentMethod|string $cashPaymentMethod = PaymentMethod::Cash, ?PaymentAccount $paymentAccount = null): Sale
+    {
+        $result = DB::transaction(function () use ($sale, $cashPaymentMethod, $paymentAccount): Sale {
             $sale->load(['items.presentation', 'items.product', 'location', 'customer', 'cashSession']);
             if ($sale->status === SaleStatus::Completed && $sale->stockMovements()->exists()) {
                 return $sale;
@@ -70,7 +104,8 @@ class SaleService
                 CashMovement::create([
                     'cash_session_id' => $sale->cash_session_id,
                     'type' => CashMovementType::Sale,
-                    'method' => PaymentMethod::Cash,
+                    'method' => $cashPaymentMethod,
+                    'payment_account_id' => $paymentAccount?->id,
                     'amount' => $sale->total,
                     'reference_type' => $sale->getMorphClass(),
                     'reference_id' => $sale->id,

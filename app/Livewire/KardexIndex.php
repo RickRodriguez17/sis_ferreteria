@@ -17,6 +17,11 @@ class KardexIndex extends Component
 
     public string $to = '';
 
+    public function mount(): void
+    {
+        abort_unless(auth()->user()?->can('inventory.view'), 403);
+    }
+
     public function render(KardexRepository $repository)
     {
         $product = $this->productId ? Product::find($this->productId) : null;

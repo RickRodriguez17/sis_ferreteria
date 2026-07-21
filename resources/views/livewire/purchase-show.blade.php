@@ -7,9 +7,9 @@
         </div>
         <div class="flex gap-2">
             @if(in_array($purchase->status->value, ['pending', 'partial'], true))
-                <a href="{{ route('receptions.create', $purchase) }}" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Registrar recepción</a>
+                @can('create', \App\Models\Reception::class)<a href="{{ route('receptions.create', $purchase) }}" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Registrar recepción</a>@endcan
                 @if($purchase->status->value === 'pending')
-                    <button wire:click="cancel" wire:confirm="¿Cancelar esta compra?" class="rounded-lg border border-rose-300 px-4 py-2 text-sm text-rose-600">Cancelar</button>
+                    @can('update', $purchase)<button wire:click="cancel" wire:confirm="¿Cancelar esta compra?" class="rounded-lg border border-rose-300 px-4 py-2 text-sm text-rose-600">Cancelar</button>@endcan
                 @endif
             @endif
         </div>

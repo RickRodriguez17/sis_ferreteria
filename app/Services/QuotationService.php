@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class QuotationService
 {
-    public function __construct(private readonly CodeGenerator $codes) {}
+    public function __construct(
+        private readonly CodeGenerator $codes,
+        private readonly SaleService $sales,
+    ) {}
 
     public function create(array $data): Quotation
     {
@@ -46,18 +49,53 @@ class QuotationService
                 'location_id' => $overrides['location_id'] ?? null,
                 'cash_session_id' => $overrides['cash_session_id'] ?? null,
             ], $overrides);
-            $sale = Sale::create($saleData);
-            $sale->items()->createMany($quotation->items->map(fn ($item): array => [
+            $items = $quotation->items->map(fn ($item): array => [
                 'product_id' => $item->product_id,
                 'presentation_id' => $item->presentation_id,
                 'quantity' => $item->quantity,
                 'base_quantity' => 0,
                 'unit_price' => $item->unit_price,
                 'subtotal' => $item->subtotal,
-            ])->all());
+            ])->all();
+            $sale = $this->sales->register($saleData, $items);
             $quotation->update(['status' => QuotationStatus::Converted]);
 
             return $sale->fresh('items');
+        });
+    }
+
+    public function update(Quotation $quotation, array $data): Quotation
+    {
+        return DB::transaction(function () use ($quotation, $data): Quotation {
+            $items = $data['items'] ?? [];
+            unset($data['items']);
+            $data['subtotal'] = collect($items)->sum('subtotal');
+            $data['total'] = max(0, (float) $data['subtotal']);
+            $quotation->update($data);
+            $quotation->items()->delete();
+            $quotation->items()->createMany($items);
+
+            return $quotation->fresh('items');
+        });
+    }
+
+    public function duplicate(Quotation $quotation): Quotation
+    {
+        return DB::transaction(function () use ($quotation): Quotation {
+            $quotation->load('items');
+
+            return $this->create([
+                'customer_id' => $quotation->customer_id,
+                'with_invoice' => $quotation->with_invoice,
+                'valid_until' => $quotation->valid_until,
+                'items' => $quotation->items->map(fn ($item): array => [
+                    'product_id' => $item->product_id,
+                    'presentation_id' => $item->presentation_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'subtotal' => $item->subtotal,
+                ])->all(),
+            ]);
         });
     }
 }

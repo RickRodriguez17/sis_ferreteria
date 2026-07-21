@@ -9,19 +9,26 @@ use App\Exceptions\CashSessionClosedException;
 use App\Models\CashMovement;
 use App\Models\CashRegister;
 use App\Models\CashSession;
+use App\Models\PaymentAccount;
 use Illuminate\Support\Facades\DB;
 
 class CashService
 {
     public function open(CashRegister $register, float|int|string $openingAmount): CashSession
     {
-        return DB::transaction(fn (): CashSession => CashSession::create([
-            'cash_register_id' => $register->id,
-            'opened_by' => auth()->id(),
-            'opening_amount' => $openingAmount,
-            'status' => CashSessionStatus::Open,
-            'opened_at' => now(),
-        ]));
+        return DB::transaction(function () use ($register, $openingAmount): CashSession {
+            if (CashSession::query()->where('cash_register_id', $register->id)->open()->lockForUpdate()->exists()) {
+                throw new \InvalidArgumentException('Ya existe una sesión abierta para esta caja.');
+            }
+
+            return CashSession::create([
+                'cash_register_id' => $register->id,
+                'opened_by' => auth()->id(),
+                'opening_amount' => $openingAmount,
+                'status' => CashSessionStatus::Open,
+                'opened_at' => now(),
+            ]);
+        });
     }
 
     public function close(CashSession $session, float|int|string $countedAmount): CashSession
@@ -45,14 +52,14 @@ class CashService
         });
     }
 
-    public function income(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null): CashMovement
+    public function income(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null, ?PaymentAccount $account = null): CashMovement
     {
-        return $this->movement($session, CashMovementType::Income, $amount, $method, $description);
+        return $this->movement($session, CashMovementType::Income, $amount, $method, $description, $account);
     }
 
-    public function expense(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null): CashMovement
+    public function expense(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null, ?PaymentAccount $account = null): CashMovement
     {
-        return $this->movement($session, CashMovementType::Expense, $amount, $method, $description);
+        return $this->movement($session, CashMovementType::Expense, $amount, $method, $description, $account);
     }
 
     public function expectedAmount(CashSession $session): string
@@ -63,12 +70,13 @@ class CashService
         return bcadd(bcsub((string) $session->opening_amount, (string) $expense, 2), (string) $income, 2);
     }
 
-    private function movement(CashSession $session, CashMovementType $type, float|int|string $amount, PaymentMethod|string $method, ?string $description): CashMovement
+    private function movement(CashSession $session, CashMovementType $type, float|int|string $amount, PaymentMethod|string $method, ?string $description, ?PaymentAccount $account = null): CashMovement
     {
+        $session->refresh();
         if ($session->status !== CashSessionStatus::Open) {
             throw new CashSessionClosedException('Cannot record movement in a closed cash session.');
         }
 
-        return $session->movements()->create(['type' => $type, 'method' => $method, 'amount' => $amount, 'description' => $description, 'created_by' => auth()->id()]);
+        return $session->movements()->create(['type' => $type, 'method' => $method, 'payment_account_id' => $account?->id, 'amount' => $amount, 'description' => $description, 'created_by' => auth()->id()]);
     }
 }

@@ -22,6 +22,11 @@ class InventoryMovements extends Component
 
     public string $type = '';
 
+    public function mount(): void
+    {
+        abort_unless(auth()->user()?->can('inventory.view'), 403);
+    }
+
     public function render()
     {
         $productIds = $this->search !== '' ? Product::query()->search($this->search)->select('id') : null;

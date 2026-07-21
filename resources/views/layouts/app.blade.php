@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
         <title>{{ config('app.name', 'Construir a tu Alcance') }}</title>
 
@@ -24,19 +25,17 @@
                     </div>
                     <nav class="space-y-6 px-3 py-6 text-sm">
                         <x-sidebar-section title="Catálogo">
-                            <x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">Productos</x-sidebar-link>
-                            <x-sidebar-link :href="route('catalog.categories')" :active="request()->routeIs('catalog.categories')">Categorías</x-sidebar-link>
-                            <x-sidebar-link :href="route('catalog.brands')" :active="request()->routeIs('catalog.brands')">Marcas</x-sidebar-link>
-                            <x-sidebar-link :href="route('catalog.units')" :active="request()->routeIs('catalog.units')">Unidades</x-sidebar-link>
-                            <x-sidebar-link :href="route('catalog.attributes')" :active="request()->routeIs('catalog.attributes')">Atributos</x-sidebar-link>
+                            @can('viewAny', \App\Models\Product::class)<x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">Productos</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\Category::class)<x-sidebar-link :href="route('catalog.categories')" :active="request()->routeIs('catalog.categories')">Categorías</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\Brand::class)<x-sidebar-link :href="route('catalog.brands')" :active="request()->routeIs('catalog.brands')">Marcas</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\Unit::class)<x-sidebar-link :href="route('catalog.units')" :active="request()->routeIs('catalog.units')">Unidades</x-sidebar-link>@endcan
+                            @can('viewAny', \App\Models\Attribute::class)<x-sidebar-link :href="route('catalog.attributes')" :active="request()->routeIs('catalog.attributes')">Atributos</x-sidebar-link>@endcan
                         </x-sidebar-section>
                         <x-sidebar-section title="Inventario">
-                            <x-sidebar-link :href="route('inventory.index')" :active="request()->routeIs('inventory.index')">Existencias</x-sidebar-link>
-                            <x-sidebar-link :href="route('inventory.transfer')" :active="request()->routeIs('inventory.transfer')">Transferencias</x-sidebar-link>
-                            <x-sidebar-link :href="route('inventory.adjust')" :active="request()->routeIs('inventory.adjust')">Ajustes</x-sidebar-link>
-                            <x-sidebar-link :href="route('inventory.kardex')" :active="request()->routeIs('inventory.kardex')">Kardex</x-sidebar-link>
-                            <x-sidebar-link :href="route('inventory.movements')" :active="request()->routeIs('inventory.movements')">Movimientos</x-sidebar-link>
-                            <x-sidebar-link :href="route('inventory.prices')" :active="request()->routeIs('inventory.prices')">Historial de precios</x-sidebar-link>
+                            @can('inventory.view')<x-sidebar-link :href="route('inventory.index')" :active="request()->routeIs('inventory.index')">Existencias</x-sidebar-link><x-sidebar-link :href="route('inventory.kardex')" :active="request()->routeIs('inventory.kardex')">Kardex</x-sidebar-link><x-sidebar-link :href="route('inventory.movements')" :active="request()->routeIs('inventory.movements')">Movimientos</x-sidebar-link>@endcan
+                            @can('inventory.transfer')<x-sidebar-link :href="route('inventory.transfer')" :active="request()->routeIs('inventory.transfer')">Transferencias</x-sidebar-link>@endcan
+                            @can('inventory.adjust')<x-sidebar-link :href="route('inventory.adjust')" :active="request()->routeIs('inventory.adjust')">Ajustes</x-sidebar-link>@endcan
+                            @can('prices.update')<x-sidebar-link :href="route('inventory.prices')" :active="request()->routeIs('inventory.prices')">Historial de precios</x-sidebar-link>@endcan
                         </x-sidebar-section>
                         <x-sidebar-section title="Compras">
                             @can('viewAny', \App\Models\Supplier::class)<x-sidebar-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.*')">Proveedores</x-sidebar-link>@endcan
@@ -53,7 +52,7 @@
                             @can('viewAny', \App\Models\PaymentAccount::class)<x-sidebar-link :href="route('cash.payment-accounts.index')" :active="request()->routeIs('cash.payment-accounts.*')">Cuentas de cobro</x-sidebar-link>@endcan
                         </x-sidebar-section>
                         <x-sidebar-section title="Herramientas">
-                            <x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')">Carga masiva</x-sidebar-link>
+                            @can('create', \App\Models\Product::class)<x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')">Carga masiva</x-sidebar-link>@endcan
                             @can('reports.view')<x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">Reportes</x-sidebar-link>@endcan
                         </x-sidebar-section>
                     </nav>

@@ -24,6 +24,11 @@ class ProductIndex extends Component
 
     public bool $belowMinimum = false;
 
+    public function mount(): void
+    {
+        Gate::authorize('viewAny', Product::class);
+    }
+
     public function delete(int $id): void
     {
         $product = Product::findOrFail($id);

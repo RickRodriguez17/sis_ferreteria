@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Location;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class CatalogManager extends Component
@@ -39,6 +40,7 @@ class CatalogManager extends Component
     {
         abort_unless(array_key_exists($type, $this->definitions()), 404);
         $this->type = $type;
+        Gate::authorize('viewAny', $this->modelClass());
     }
 
     protected function definitions(): array
@@ -85,7 +87,7 @@ class CatalogManager extends Component
 
     public function save(): void
     {
-        $rules = ['name' => ['required', 'string', 'max:255'], 'isActive' => ['boolean']];
+        $rules = ['name' => ['required', 'string', 'max:255', Rule::unique($this->modelClass(), 'name')->ignore($this->editingId)], 'isActive' => ['boolean']];
         if ($this->type === 'categories') {
             $rules['parentId'] = ['nullable', 'exists:categories,id'];
         }

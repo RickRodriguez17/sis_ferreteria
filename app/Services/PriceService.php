@@ -14,12 +14,12 @@ class PriceService
     public function changePrice(Presentation $presentation, PriceField|string $field, float|int|string $newValue, ?string $reason = null): PriceHistory
     {
         if (! auth()->user()?->can('prices.update')) {
-            throw new PriceChangeNotAllowedException('The current user cannot change prices.');
+            throw new PriceChangeNotAllowedException('El usuario actual no puede modificar precios.');
         }
         $field = $field instanceof PriceField ? $field : PriceField::from($field);
         $history = DB::transaction(function () use ($presentation, $field, $newValue, $reason): PriceHistory {
             if (! in_array($field, [PriceField::PriceWithInvoice, PriceField::PriceWithoutInvoice], true)) {
-                throw new PriceChangeNotAllowedException('Cost changes must be handled by inventory cost recalculation.');
+                throw new PriceChangeNotAllowedException('Los costos deben gestionarse mediante la recalculación del costo de inventario.');
             }
             $oldValue = $presentation->{$field->value};
             $presentation->update([$field->value => $newValue]);

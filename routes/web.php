@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\DocumentPdfController;
 use App\Livewire\CatalogManager;
+use App\Livewire\CreditIndex;
+use App\Livewire\CreditShow;
 use App\Livewire\CustomerForm;
 use App\Livewire\CustomerIndex;
 use App\Livewire\CustomerShow;
@@ -56,6 +58,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('quotations/{quotation}/edit', QuotationForm::class)->name('quotations.edit');
     Route::get('quotations/{quotation}', QuotationShow::class)->name('quotations.show');
     Route::get('quotations/{quotation}/pdf', [DocumentPdfController::class, 'quotation'])->name('quotations.pdf');
+    Route::get('credits', CreditIndex::class)->name('credits.index');
+    Route::get('credits/{credit}', CreditShow::class)->name('credits.show');
     Route::get('purchases', PurchaseIndex::class)->name('purchases.index');
     Route::get('purchases/create', PurchaseForm::class)->name('purchases.create');
     Route::get('purchases/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');

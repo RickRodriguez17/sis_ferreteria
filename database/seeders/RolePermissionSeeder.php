@@ -19,7 +19,7 @@ class RolePermissionSeeder extends Seeder
                 $permissions[] = "{$resource}.{$action}";
             }
         }
-        $permissions = array_merge($permissions, ['prices.update', 'inventory.adjust', 'inventory.transfer', 'cash.open', 'cash.close', 'cash.movement', 'reports.view', 'audit.view', 'settings.update']);
+        $permissions = array_merge($permissions, ['credits.cancel', 'prices.update', 'inventory.adjust', 'inventory.transfer', 'cash.open', 'cash.close', 'cash.movement', 'reports.view', 'audit.view', 'settings.update']);
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission);
         }

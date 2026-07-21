@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DocumentPdfController;
 use App\Livewire\CatalogManager;
 use App\Livewire\CustomerForm;
 use App\Livewire\CustomerIndex;
@@ -16,7 +17,13 @@ use App\Livewire\ProductIndex;
 use App\Livewire\PurchaseForm;
 use App\Livewire\PurchaseIndex;
 use App\Livewire\PurchaseShow;
+use App\Livewire\QuotationForm;
+use App\Livewire\QuotationIndex;
+use App\Livewire\QuotationShow;
 use App\Livewire\ReceptionForm;
+use App\Livewire\SaleForm;
+use App\Livewire\SaleIndex;
+use App\Livewire\SaleShow;
 use App\Livewire\SupplierIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +47,15 @@ Route::middleware('auth')->group(function (): void {
     Route::get('customers/create', CustomerForm::class)->name('customers.create');
     Route::get('customers/{customer}/edit', CustomerForm::class)->name('customers.edit');
     Route::get('customers/{customer}', CustomerShow::class)->name('customers.show');
+    Route::get('sales', SaleIndex::class)->name('sales.index');
+    Route::get('sales/create', SaleForm::class)->name('sales.create');
+    Route::get('sales/{sale}', SaleShow::class)->name('sales.show');
+    Route::get('sales/{sale}/pdf', [DocumentPdfController::class, 'sale'])->name('sales.pdf');
+    Route::get('quotations', QuotationIndex::class)->name('quotations.index');
+    Route::get('quotations/create', QuotationForm::class)->name('quotations.create');
+    Route::get('quotations/{quotation}/edit', QuotationForm::class)->name('quotations.edit');
+    Route::get('quotations/{quotation}', QuotationShow::class)->name('quotations.show');
+    Route::get('quotations/{quotation}/pdf', [DocumentPdfController::class, 'quotation'])->name('quotations.pdf');
     Route::get('purchases', PurchaseIndex::class)->name('purchases.index');
     Route::get('purchases/create', PurchaseForm::class)->name('purchases.create');
     Route::get('purchases/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');

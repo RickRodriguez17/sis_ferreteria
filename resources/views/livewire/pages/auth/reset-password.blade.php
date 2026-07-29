@@ -1,11 +1,11 @@
 <?php
 
+use App\Support\PasswordRules;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
@@ -36,7 +36,7 @@ new #[Layout('layouts.guest')] class extends Component
         $this->validate([
             'token' => ['required'],
             'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'confirmed', PasswordRules::strong()],
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we

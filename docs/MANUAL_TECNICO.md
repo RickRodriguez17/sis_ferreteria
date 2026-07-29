@@ -25,6 +25,69 @@ Para el diseño completo consulte `PLAN_ARQUITECTURA.md`, `ANALISIS_TECNICO.md` 
 - **Caja:** una caja tiene una sesión abierta; apertura, movimientos y cierre registran arqueo. QR/transferencia usan cuentas activas.
 - **Reportes:** `ReportRepository` y `DashboardService` hacen agregados con `selectRaw`, `groupBy` y eager loading; Excel y PDF respetan filtros.
 
+## Endurecimiento de producción
+
+### Política de contraseñas
+
+`App\Support\PasswordRules` centraliza la regla de contraseñas. Exige al menos
+8 caracteres, mayúsculas, minúsculas, números y símbolos, y se utiliza en
+usuarios, registro, restablecimiento y actualización del perfil. No se activa
+`uncompromised()` porque consulta un servicio externo y el proyecto debe poder
+validar contraseñas sin red; puede evaluarse en una futura iteración con una
+fuente local o un servicio aprobado.
+
+El login conserva su límite existente de cinco intentos por correo e IP. Las
+rutas de solicitud y restablecimiento de contraseña usan un límite adicional
+de seis solicitudes por minuto. No se duplicó el rate limiter del login.
+
+### Colas, scheduler y backups
+
+Las migraciones estándar crean `jobs`, `job_batches` y `failed_jobs`, por lo
+que `QUEUE_CONNECTION=database` puede utilizarse en producción. Ejecute un
+worker persistente mediante Supervisor:
+
+```bash
+php artisan queue:work database --sleep=3 --tries=3 --timeout=90
+```
+
+El cron debe ejecutar cada minuto:
+
+```cron
+* * * * * cd /ruta/sis_ferreteria && php artisan schedule:run >> /dev/null 2>&1
+```
+
+El comando `backup:database` ejecuta `mysqldump` usando la conexión configurada,
+escribe en el disco de Storage configurado, retiene 14 días por defecto y
+elimina respaldos vencidos. La tarea se programa diariamente a las 02:00.
+Para restaurar, detenga los workers y cargue el SQL en una base de datos
+controlada con el cliente `mysql`; pruebe periódicamente el procedimiento.
+
+### HTTPS y proxies
+
+En `APP_ENV=production` se fuerza el esquema HTTPS y se habilita la confianza
+en proxies mediante la configuración de middleware. En desarrollo local no se
+aplica ninguna de estas opciones, para conservar `http://localhost`.
+
+### Checklist
+
+Antes de publicar:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan optimize
+```
+
+Verifique `APP_DEBUG=false`, cookies seguras, HTTPS, permisos de escritura para
+`storage` y `bootstrap/cache`, cron del scheduler, worker de colas y un backup
+restaurable.
+
+La autenticación de dos factores (2FA) queda pendiente. Se recomienda
+implementarla en un PR separado mediante un proveedor compatible con el flujo
+Livewire actual, con recuperación, códigos de respaldo, pruebas de sesión y
+sin alterar el login hasta contar con una migración y plan de transición.
+
 ## Matriz de permisos
 
 | Área | Administrador | Gerente | Vendedor | Cajero | Almacenero |

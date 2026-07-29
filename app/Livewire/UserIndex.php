@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Livewire\Traits\WithTableState;
 use App\Models\User;
+use App\Support\PasswordRules;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -72,7 +73,7 @@ class UserIndex extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$this->editingId],
             'roleName' => ['required', 'in:Administrador,Gerente,Cajero'],
-            'password' => [$isEditing ? 'nullable' : 'required', 'string', 'min:8', 'confirmed'],
+            'password' => [$isEditing ? 'nullable' : 'required', 'string', PasswordRules::strong(), 'confirmed'],
             'isActive' => ['boolean'],
         ], [], [
             'name' => 'nombre',

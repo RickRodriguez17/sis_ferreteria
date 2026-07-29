@@ -40,14 +40,14 @@ class UserManagementTest extends TestCase
             ->set('name', 'Vendedor nuevo')
             ->set('email', 'vendedor.nuevo@construir.local')
             ->set('roleName', 'Gerente')
-            ->set('password', 'password123')
-            ->set('password_confirmation', 'password123')
+            ->set('password', 'Fuerte123!')
+            ->set('password_confirmation', 'Fuerte123!')
             ->call('save')
             ->assertHasNoErrors();
 
         $user = User::where('email', 'vendedor.nuevo@construir.local')->firstOrFail();
         $this->assertTrue($user->hasRole('Gerente'));
-        $this->assertTrue(Hash::check('password123', $user->password));
+        $this->assertTrue(Hash::check('Fuerte123!', $user->password));
         $this->assertTrue((bool) $user->is_active);
     }
 

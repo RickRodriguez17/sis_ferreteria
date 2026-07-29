@@ -3,12 +3,16 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\ReportRepository;
+use App\Support\CompanySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class ReportService
 {
-    public function __construct(private readonly ReportRepository $repository) {}
+    public function __construct(
+        private readonly ReportRepository $repository,
+        private readonly CompanySettings $settings,
+    ) {}
 
     public function query(string $type, array $filters = []): Builder
     {
@@ -63,15 +67,15 @@ class ReportService
     {
         return $items->map(function ($item) use ($type): array {
             return match ($type) {
-                'sales' => [$item->code, $item->created_at?->format('d/m/Y'), $item->customer?->name ?: 'Ocasional', $item->status->value, number_format((float) $item->total, 2)],
-                'purchases' => [$item->code, $item->created_at?->format('d/m/Y'), $item->supplier?->name, $item->status->value, number_format((float) $item->total, 2)],
+                'sales' => [$item->code, $item->created_at?->format('d/m/Y'), $item->customer?->name ?: 'Ocasional', $item->status->value, $this->settings->money($item->total)],
+                'purchases' => [$item->code, $item->created_at?->format('d/m/Y'), $item->supplier?->name, $item->status->value, $this->settings->money($item->total)],
                 'inventory', 'low-stock' => [$item->product?->name, $item->location?->name, $item->quantity, $item->product?->min_stock],
                 'kardex' => [$item->created_at?->format('d/m/Y H:i'), $item->product?->name, $item->location?->name, $item->type->value, $item->direction->value, $item->quantity, $item->balance_after],
-                'customers' => [$item->name, $item->document_number ?? '—', $item->sales_count, $item->credits_count, number_format((float) ($item->credits_sum_balance ?? 0), 2)],
+                'customers' => [$item->name, $item->document_number ?? '—', $item->sales_count, $item->credits_count, $this->settings->money($item->credits_sum_balance ?? 0)],
                 'suppliers' => [$item->name, $item->document_number ?? '—', $item->purchases_count, $item->is_active ? 'Activo' : 'Inactivo'],
-                'cash' => [$item->created_at?->format('d/m/Y H:i'), $item->type->value, $item->method->value, $item->paymentAccount?->name ?: '—', number_format((float) $item->amount, 2), $item->description ?? '—'],
-                'credits' => [$item->customer?->name, $item->sale?->code ?: '—', $item->status->value, number_format((float) $item->original_amount, 2), number_format((float) $item->paid_amount, 2), number_format((float) $item->balance, 2), $item->due_date?->format('d/m/Y') ?: '—'],
-                'best-selling' => [$item->product?->name, $item->quantity, number_format((float) $item->amount, 2)],
+                'cash' => [$item->created_at?->format('d/m/Y H:i'), $item->type->value, $item->method->value, $item->paymentAccount?->name ?: '—', $this->settings->money($item->amount), $item->description ?? '—'],
+                'credits' => [$item->customer?->name, $item->sale?->code ?: '—', $item->status->value, $this->settings->money($item->original_amount), $this->settings->money($item->paid_amount), $this->settings->money($item->balance), $item->due_date?->format('d/m/Y') ?: '—'],
+                'best-selling' => [$item->product?->name, $item->quantity, $this->settings->money($item->amount)],
                 default => [],
             };
         })->all();

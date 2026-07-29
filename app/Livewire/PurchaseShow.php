@@ -7,10 +7,10 @@ use App\Exceptions\PriceChangeNotAllowedException;
 use App\Exceptions\PurchaseCannotBeCancelledException;
 use App\Models\Product;
 use App\Models\Purchase;
-use App\Models\Setting;
 use App\Services\PriceService;
 use App\Services\PurchaseService;
 use App\Services\Support\MarginCalculator;
+use App\Support\CompanySettings;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -25,10 +25,10 @@ class PurchaseShow extends Component
 
     public string $priceReason = 'Precio sugerido posterior a recepción';
 
-    public function mount(Purchase $purchase): void
+    public function mount(Purchase $purchase, CompanySettings $settings): void
     {
         Gate::authorize('view', $purchase);
-        $this->margin = (string) (Setting::query()->where('key', 'default_margin')->value('value') ?? '0.30');
+        $this->margin = $settings->defaultMargin();
         $this->purchase = $purchase->load(['supplier', 'items.product.presentations', 'receptions.location', 'receptions.attachments', 'costHistories.product']);
         foreach ($this->receivedProducts() as $product) {
             $this->productMargins[$product->id] = $this->margin;

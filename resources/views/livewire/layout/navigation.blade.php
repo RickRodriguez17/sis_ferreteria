@@ -16,7 +16,7 @@ new class extends Component
     <div class="flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
             <button type="button" @click="sidebarOpen = ! sidebarOpen" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 lg:hidden" aria-label="Abrir menú"><i class="bi bi-list text-2xl"></i></button>
-            <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-800 lg:hidden"><i class="bi bi-shop text-indigo-600"></i>Construir a tu Alcance</a>
+                    <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-800 lg:hidden"><i class="bi bi-shop text-indigo-600"></i>{{ app(\App\Support\CompanySettings::class)->name() }}</a>
             <div class="hidden items-center gap-2 text-sm text-slate-500 lg:flex"><i class="bi bi-house-door text-indigo-600"></i><span>Panel de gestión</span></div>
         </div>
         <div class="flex items-center gap-3" x-data="{ profileOpen: false }">

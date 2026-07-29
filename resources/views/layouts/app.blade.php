@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-        <title>{{ config('app.name', 'Construir a tu Alcance') }}</title>
+        <title>{{ app(\App\Support\CompanySettings::class)->name() }}</title>
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -17,7 +17,7 @@
                 <div class="flex h-20 shrink-0 items-center justify-between border-b border-slate-800 px-6">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-3" wire:navigate>
                         <span class="erp-icon bg-indigo-600 text-white"><i class="bi bi-shop"></i></span>
-                        <span><span class="block text-base font-bold tracking-tight">Construir a tu Alcance</span><span class="block text-xs text-slate-400">ERP ferretero</span></span>
+                        <span><span class="block text-base font-bold tracking-tight">{{ app(\App\Support\CompanySettings::class)->name() }}</span><span class="block text-xs text-slate-400">ERP ferretero</span></span>
                     </a>
                     <button class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" @click="sidebarOpen = false" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
                 </div>
@@ -56,11 +56,12 @@
                         @can('create', \App\Models\Product::class)<x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')" wire:navigate><i class="bi bi-file-earmark-arrow-up w-5 text-center"></i>Carga masiva</x-sidebar-link>@endcan
                         @can('reports.view')<x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.*')" wire:navigate><i class="bi bi-file-earmark-bar-graph w-5 text-center"></i>Reportes</x-sidebar-link>@endcan
                     </x-sidebar-group>
-                    @can('viewAny', \App\Models\User::class)
-                        <x-sidebar-group title="Administración" icon="bi-shield-lock" :active="request()->routeIs('users.*')">
-                            <x-sidebar-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate><i class="bi bi-people w-5 text-center"></i>Usuarios</x-sidebar-link>
+                    @if(auth()->user()?->can('viewAny', \App\Models\User::class) || auth()->user()?->can('update', \App\Models\Setting::class))
+                        <x-sidebar-group title="Administración" icon="bi-shield-lock" :active="request()->routeIs('users.*', 'settings.*')">
+                            @can('viewAny', \App\Models\User::class)<x-sidebar-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate><i class="bi bi-people w-5 text-center"></i>Usuarios</x-sidebar-link>@endcan
+                            @can('update', \App\Models\Setting::class)<x-sidebar-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')" wire:navigate><i class="bi bi-building-gear w-5 text-center"></i>Configuración</x-sidebar-link>@endcan
                         </x-sidebar-group>
-                    @endcan
+                    @endif
                 </nav>
             </aside>
             <div class="min-w-0 lg:pl-72">

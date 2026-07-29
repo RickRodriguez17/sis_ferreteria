@@ -1,5 +1,5 @@
 <div>
-    <div class="mb-6"><h1 class="text-2xl font-bold text-slate-900">Panel ejecutivo</h1><p class="text-sm text-slate-500">Resumen operativo de Construir a tu Alcance.</p></div>
+    <div class="mb-6"><h1 class="text-2xl font-bold text-slate-900">Panel ejecutivo</h1><p class="text-sm text-slate-500">Resumen operativo de {{ app(\App\Support\CompanySettings::class)->name() }}.</p></div>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         @can('viewAny', \App\Models\Sale::class)<div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-xs uppercase text-slate-500">Ventas del día</div><div class="mt-2 text-2xl font-bold text-indigo-700">{{ number_format($salesToday, 2) }}</div><div class="text-xs text-slate-500">{{ $salesCountToday }} operaciones</div></div>@endcan
         @can('viewAny', \App\Models\Purchase::class)<div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-xs uppercase text-slate-500">Compras del día</div><div class="mt-2 text-2xl font-bold">{{ number_format($purchasesToday, 2) }}</div></div>@endcan

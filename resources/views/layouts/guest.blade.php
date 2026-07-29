@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
-        <title>{{ config('app.name', 'Construir a tu Alcance') }}</title>
+        <title>{{ app(\App\Support\CompanySettings::class)->name() }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -20,7 +20,7 @@
             <div class="mb-6 text-center">
                 <a href="/" wire:navigate>
                     <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl text-white shadow-lg"><i class="bi bi-shop"></i></span>
-                    <span class="mt-3 block text-xl font-bold tracking-tight text-slate-800">Construir a tu Alcance</span>
+                    <span class="mt-3 block text-xl font-bold tracking-tight text-slate-800">{{ app(\App\Support\CompanySettings::class)->name() }}</span>
                 </a>
             </div>
             <div class="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-xl">

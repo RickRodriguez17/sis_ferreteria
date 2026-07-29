@@ -1,1 +1,1 @@
-<span {{ $attributes }}>Construir a tu Alcance</span>
+<span {{ $attributes }}>{{ app(\App\Support\CompanySettings::class)->name() }}</span>

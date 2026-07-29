@@ -94,10 +94,12 @@ class PaymentForm extends Component
             session()->flash('success', 'Cobro registrado correctamente.');
             $this->reset(['amount', 'notes']);
         } catch (Throwable $exception) {
-            $this->addError('amount', match (true) {
+            $message = match (true) {
                 $exception instanceof \InvalidArgumentException => $exception->getMessage(),
                 default => 'No fue posible registrar el cobro. Verifica el saldo y la caja abierta.',
-            });
+            };
+            $this->addError('amount', $message);
+            $this->dispatch('alert', type: 'error', title: 'Cobro no registrado', message: $message);
         }
     }
 

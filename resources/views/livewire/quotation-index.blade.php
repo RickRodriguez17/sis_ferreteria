@@ -1,4 +1,5 @@
 <div>
+    <x-pagetitle title="Cotizaciones" icon="bi-file-earmark-text" section="Ventas" />
     <div class="mb-6 flex items-center justify-between">
         <div><h1 class="text-2xl font-bold text-slate-900">Cotizaciones</h1><p class="text-sm text-slate-500">Propuestas comerciales e historial.</p></div>
         @can('create', \App\Models\Quotation::class)<a href="{{ route('quotations.create') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Nueva cotización</a>@endcan

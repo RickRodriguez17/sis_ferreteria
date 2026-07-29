@@ -1,4 +1,5 @@
 <div>
+    <x-pagetitle title="Productos" icon="bi-box-seam" section="Catálogo" />
     <div class="mb-6 flex items-center justify-between"><div><h1 class="text-2xl font-bold text-slate-900">Productos</h1><p class="text-sm text-slate-500">Catálogo, precios, presentaciones e inventario.</p></div>@can('create', \App\Models\Product::class)<a href="{{ route('products.create') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Nuevo producto</a>@endcan</div>
     @if(session('success'))<div class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">{{ session('success') }}</div>@endif
     <div class="rounded-xl bg-white p-5 shadow-sm">

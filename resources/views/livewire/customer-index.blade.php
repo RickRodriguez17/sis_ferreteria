@@ -1,4 +1,5 @@
 <div>
+    <x-pagetitle title="Clientes" icon="bi-people" section="Ventas" />
     <div class="mb-6 flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-slate-900">Clientes</h1>

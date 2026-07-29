@@ -58,6 +58,29 @@ class CreditService
         return Credit::query()->where('balance', '>', 0)->where('status', '!=', CreditStatus::Cancelled)->whereDate('due_date', '<', now())->update(['status' => CreditStatus::Overdue]);
     }
 
+    public function applyReturn(Credit $credit, float|int|string $amount): Credit
+    {
+        return DB::transaction(function () use ($credit, $amount): Credit {
+            $credit = Credit::query()->lockForUpdate()->findOrFail($credit->id);
+            if ($credit->status === CreditStatus::Cancelled) {
+                throw new \InvalidArgumentException('No se puede aplicar una devolución a un crédito anulado.');
+            }
+            if (bccomp((string) $amount, '0', 2) <= 0 || bccomp((string) $amount, (string) $credit->balance, 2) > 0) {
+                throw new \InvalidArgumentException('El monto de la devolución no puede superar el saldo del crédito.');
+            }
+
+            $original = bcsub((string) $credit->original_amount, (string) $amount, 2);
+            $balance = bcsub((string) $credit->balance, (string) $amount, 2);
+            $credit->update([
+                'original_amount' => max('0.00', $original),
+                'balance' => max('0.00', $balance),
+                'status' => bccomp($balance, '0', 2) === 0 ? CreditStatus::Paid : $credit->status,
+            ]);
+
+            return $credit->fresh();
+        });
+    }
+
     public function cancel(Credit $credit): Credit
     {
         return DB::transaction(function () use ($credit): Credit {

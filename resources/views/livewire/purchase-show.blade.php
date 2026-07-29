@@ -9,7 +9,7 @@
             @if(in_array($purchase->status->value, ['pending', 'partial'], true))
                 @can('create', \App\Models\Reception::class)<a href="{{ route('receptions.create', $purchase) }}" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Registrar recepción</a>@endcan
                 @if($purchase->status->value === 'pending')
-                    @can('update', $purchase)<button wire:click="cancel" wire:confirm="¿Cancelar esta compra?" class="rounded-lg border border-rose-300 px-4 py-2 text-sm text-rose-600">Cancelar</button>@endcan
+                    @can('update', $purchase)<button x-data x-on:click.prevent="confirmLivewireAction($wire, 'cancel', [], '¿Cancelar esta compra?')" class="rounded-lg border border-rose-300 px-4 py-2 text-sm text-rose-600">Cancelar</button>@endcan
                 @endif
             @endif
         </div>

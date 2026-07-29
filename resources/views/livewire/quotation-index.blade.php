@@ -1,10 +1,9 @@
 <div>
-    <x-pagetitle title="Cotizaciones" icon="bi-file-earmark-text" section="Ventas" />
-    <div class="mb-6 flex items-center justify-between">
-        <div><h1 class="text-2xl font-bold text-slate-900">Cotizaciones</h1><p class="text-sm text-slate-500">Propuestas comerciales e historial.</p></div>
+    <x-pagetitle title="Cotizaciones" icon="bi-file-earmark-text" section="Ventas" subtitle="Propuestas comerciales e historial.">
+        <x-slot:actions>
         @can('create', \App\Models\Quotation::class)<a href="{{ route('quotations.create') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Nueva cotización</a>@endcan
-    </div>
-    @if(session('success'))<div class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">{{ session('success') }}</div>@endif
+        </x-slot:actions>
+    </x-pagetitle>
     <div class="rounded-xl bg-white p-5 shadow-sm">
         <x-table-toolbar wire:model.live.debounce.300ms="search">
             <select wire:model.live="status" class="rounded-lg border-slate-300 text-sm"><option value="">Estados</option>@foreach($statuses as $item)<option value="{{ $item->value }}">{{ ['open' => 'Abierta', 'converted' => 'Convertida', 'expired' => 'Vencida', 'cancelled' => 'Cancelada'][$item->value] }}</option>@endforeach</select>

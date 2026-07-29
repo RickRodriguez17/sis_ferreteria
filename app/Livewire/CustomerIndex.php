@@ -41,7 +41,7 @@ class CustomerIndex extends Component
         $customer = Customer::findOrFail($id);
         Gate::authorize('update', $customer);
         $service->toggle($customer);
-        session()->flash('success', 'Estado del cliente actualizado.');
+        $this->dispatch('toast', message: 'Estado del cliente actualizado.', type: 'success');
     }
 
     public function delete(int $id, CustomerService $service): void
@@ -49,7 +49,7 @@ class CustomerIndex extends Component
         $customer = Customer::findOrFail($id);
         Gate::authorize('delete', $customer);
         $service->delete($customer);
-        session()->flash('success', 'Cliente eliminado correctamente.');
+        $this->dispatch('toast', message: 'Cliente eliminado correctamente.', type: 'success');
     }
 
     public function render()

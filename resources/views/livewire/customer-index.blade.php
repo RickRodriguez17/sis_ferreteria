@@ -1,15 +1,11 @@
 <div>
-    <x-pagetitle title="Clientes" icon="bi-people" section="Ventas" />
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">Clientes</h1>
-            <p class="text-sm text-slate-500">Administra clientes registrados, ocasionales y de crédito.</p>
-        </div>
+    <x-pagetitle title="Clientes" icon="bi-people" section="Ventas" subtitle="Administra clientes registrados, ocasionales y de crédito.">
+        <x-slot:actions>
         @can('create', \App\Models\Customer::class)
             <button wire:click="create" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Agregar cliente</button>
         @endcan
-    </div>
-    @if(session('success'))<div class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">{{ session('success') }}</div>@endif
+        </x-slot:actions>
+    </x-pagetitle>
     <div class="rounded-xl bg-white p-5 shadow-sm">
         <x-table-toolbar wire:model.live.debounce.300ms="search">
             <select wire:model.live="type" class="rounded-lg border-slate-300 text-sm">

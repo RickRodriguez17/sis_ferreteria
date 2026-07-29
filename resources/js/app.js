@@ -85,7 +85,7 @@ document.addEventListener('click', (event) => {
     const instance = component ? window.Livewire.find(component.getAttribute('wire:id')) : null;
 
     if (instance) {
-        window.confirmLivewireAction(instance, match[1], params, element.dataset.confirmMessage || messages[match[1].toLowerCase()])
+        window.confirmLivewireAction(instance, match[1], params, element.dataset.confirmMessage || element.getAttribute('wire:confirm') || messages[match[1].toLowerCase()])
             .finally(() => {
                 delete element.dataset.confirmationHandled;
             });

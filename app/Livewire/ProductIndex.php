@@ -34,7 +34,7 @@ class ProductIndex extends Component
         $product = Product::findOrFail($id);
         Gate::authorize('delete', $product);
         $product->delete();
-        session()->flash('success', 'Producto eliminado.');
+        $this->dispatch('toast', message: 'Producto eliminado.', type: 'success');
     }
 
     public function updated($property): void

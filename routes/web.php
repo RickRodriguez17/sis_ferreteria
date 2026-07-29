@@ -34,6 +34,8 @@ use App\Livewire\SaleForm;
 use App\Livewire\SaleIndex;
 use App\Livewire\SaleShow;
 use App\Livewire\SupplierIndex;
+use App\Livewire\UserIndex;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
@@ -73,6 +75,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('cash/payment-accounts', PaymentAccountIndex::class)->name('cash.payment-accounts.index');
     Route::get('reports/{type?}', ReportIndex::class)->name('reports.index');
     Route::get('reports/{type}/pdf', ReportPdfController::class)->name('reports.pdf');
+    Route::get('users', UserIndex::class)->middleware('can:viewAny,'.User::class)->name('users.index');
     Route::get('purchases', PurchaseIndex::class)->name('purchases.index');
     Route::get('purchases/create', PurchaseForm::class)->name('purchases.create');
     Route::get('purchases/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');

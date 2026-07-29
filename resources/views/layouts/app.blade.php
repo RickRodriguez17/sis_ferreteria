@@ -54,6 +54,11 @@
                         @can('create', \App\Models\Product::class)<x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')" wire:navigate><i class="bi bi-file-earmark-arrow-up w-5 text-center"></i>Carga masiva</x-sidebar-link>@endcan
                         @can('reports.view')<x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.*')" wire:navigate><i class="bi bi-file-earmark-bar-graph w-5 text-center"></i>Reportes</x-sidebar-link>@endcan
                     </x-sidebar-group>
+                    @can('viewAny', \App\Models\User::class)
+                        <x-sidebar-group title="Administración" icon="bi-shield-lock" :active="request()->routeIs('users.*')">
+                            <x-sidebar-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate><i class="bi bi-people w-5 text-center"></i>Usuarios</x-sidebar-link>
+                        </x-sidebar-group>
+                    @endcan
                 </nav>
             </aside>
             <div class="min-w-0 lg:pl-72">

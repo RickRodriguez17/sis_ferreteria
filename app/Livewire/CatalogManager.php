@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\Unit;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -124,8 +125,12 @@ class CatalogManager extends Component
     {
         $model = $this->modelClass()::findOrFail($id);
         Gate::authorize('delete', $model);
-        $model->delete();
-        $this->dispatch('toast', message: 'Registro eliminado.');
+        try {
+            $model->delete();
+            $this->dispatch('toast', message: 'Registro eliminado.');
+        } catch (QueryException) {
+            $this->dispatch('toast', message: "No se puede eliminar «{$model->name}»: tiene registros asociados.", type: 'error');
+        }
     }
 
     public function addValue(int $attributeId): void

@@ -36,7 +36,7 @@ class SaleIndex extends Component
         Gate::authorize('delete', $sale);
         try {
             $service->cancel($sale);
-            session()->flash('success', 'Venta cancelada correctamente.');
+            $this->dispatch('toast', message: 'Venta cancelada correctamente.', type: 'success');
         } catch (Throwable) {
             $this->addError('cancel', 'No fue posible cancelar la venta.');
         }

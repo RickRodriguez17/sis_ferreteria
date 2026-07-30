@@ -31,7 +31,7 @@ class QuotationIndex extends Component
     {
         Gate::authorize('create', Quotation::class);
         $quotation = $service->duplicate(Quotation::findOrFail($id));
-        session()->flash('success', 'Cotización duplicada correctamente.');
+        $this->dispatch('toast', message: 'Cotización duplicada correctamente.', type: 'success');
         $this->redirectRoute('quotations.edit', $quotation, navigate: true);
     }
 

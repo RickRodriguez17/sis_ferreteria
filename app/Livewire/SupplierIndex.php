@@ -84,7 +84,7 @@ class SupplierIndex extends Component
             $service->create($data);
         }
         $this->closeModal();
-        session()->flash('success', 'Proveedor guardado correctamente.');
+        $this->dispatch('toast', message: 'Proveedor guardado correctamente.', type: 'success');
     }
 
     public function toggle(int $id): void
@@ -99,7 +99,7 @@ class SupplierIndex extends Component
         $supplier = Supplier::findOrFail($id);
         Gate::authorize('delete', $supplier);
         $supplier->delete();
-        session()->flash('success', 'Proveedor eliminado.');
+        $this->dispatch('toast', message: 'Proveedor eliminado.', type: 'success');
     }
 
     public function restore(int $id): void

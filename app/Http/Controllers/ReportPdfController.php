@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Services\ReportService;
+use App\Support\CompanySettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ReportPdfController extends Controller
 {
-    public function __invoke(Request $request, string $type, ReportService $service): Response
+    public function __invoke(Request $request, string $type, ReportService $service, CompanySettings $company): Response
     {
         abort_unless($request->user()?->can('reports.view'), 403);
         $filters = $request->only(['from', 'to', 'search', 'status', 'customer_id', 'supplier_id', 'product_id', 'location_id', 'method']);
@@ -19,6 +20,7 @@ class ReportPdfController extends Controller
             'title' => $service->title($type),
             'headings' => $service->headings($type),
             'rows' => $service->rows($type, $items),
+            'company' => $company,
         ];
         if ($request->boolean('print')) {
             return response()->view('pdf.report', $data);

@@ -8,7 +8,7 @@
             @if($subtitle)<p class="mt-1 text-sm text-slate-500">{{ $subtitle }}</p>@endif
         </div>
     </div>
-    @if(trim((string) $actions))
+    @if(isset($actions) && trim((string) $actions))
         <div class="shrink-0">{{ $actions }}</div>
     @endif
 </div>

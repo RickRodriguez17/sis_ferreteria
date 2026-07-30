@@ -10,6 +10,7 @@ use App\Models\CashMovement;
 use App\Models\CashRegister;
 use App\Models\CashSession;
 use App\Models\PaymentAccount;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class CashService
@@ -52,14 +53,14 @@ class CashService
         });
     }
 
-    public function income(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null, ?PaymentAccount $account = null): CashMovement
+    public function income(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null, ?PaymentAccount $account = null, ?Model $reference = null): CashMovement
     {
-        return $this->movement($session, CashMovementType::Income, $amount, $method, $description, $account);
+        return $this->movement($session, CashMovementType::Income, $amount, $method, $description, $account, $reference);
     }
 
-    public function expense(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null, ?PaymentAccount $account = null): CashMovement
+    public function expense(CashSession $session, float|int|string $amount, PaymentMethod|string $method, ?string $description = null, ?PaymentAccount $account = null, ?Model $reference = null): CashMovement
     {
-        return $this->movement($session, CashMovementType::Expense, $amount, $method, $description, $account);
+        return $this->movement($session, CashMovementType::Expense, $amount, $method, $description, $account, $reference);
     }
 
     public function expectedAmount(CashSession $session): string
@@ -70,13 +71,13 @@ class CashService
         return bcadd(bcsub((string) $session->opening_amount, (string) $expense, 2), (string) $income, 2);
     }
 
-    private function movement(CashSession $session, CashMovementType $type, float|int|string $amount, PaymentMethod|string $method, ?string $description, ?PaymentAccount $account = null): CashMovement
+    private function movement(CashSession $session, CashMovementType $type, float|int|string $amount, PaymentMethod|string $method, ?string $description, ?PaymentAccount $account = null, ?Model $reference = null): CashMovement
     {
         $session->refresh();
         if ($session->status !== CashSessionStatus::Open) {
             throw new CashSessionClosedException('Cannot record movement in a closed cash session.');
         }
 
-        return $session->movements()->create(['type' => $type, 'method' => $method, 'payment_account_id' => $account?->id, 'amount' => $amount, 'description' => $description, 'created_by' => auth()->id()]);
+        return $session->movements()->create(['type' => $type, 'method' => $method, 'payment_account_id' => $account?->id, 'amount' => $amount, 'description' => $description, 'reference_type' => $reference?->getMorphClass(), 'reference_id' => $reference?->getKey(), 'created_by' => auth()->id()]);
     }
 }

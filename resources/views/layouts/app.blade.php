@@ -36,15 +36,17 @@
                         @can('inventory.adjust')<x-sidebar-link :href="route('inventory.adjust')" :active="request()->routeIs('inventory.adjust')" wire:navigate><i class="bi bi-sliders w-5 text-center"></i>Ajustes</x-sidebar-link>@endcan
                         @can('prices.update')<x-sidebar-link :href="route('inventory.prices')" :active="request()->routeIs('inventory.prices')" wire:navigate><i class="bi bi-tags-fill w-5 text-center"></i>Historial de precios</x-sidebar-link>@endcan
                     </x-sidebar-group>
-                    <x-sidebar-group title="Compras" icon="bi-bag-check" :active="request()->routeIs('suppliers.*', 'purchases.*', 'receptions.*')">
+                    <x-sidebar-group title="Compras" icon="bi-bag-check" :active="request()->routeIs('suppliers.*', 'purchases.*', 'receptions.*', 'returns.index') && request('type') === 'supplier'">
                         @can('viewAny', \App\Models\Supplier::class)<x-sidebar-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.*')" wire:navigate><i class="bi bi-truck w-5 text-center"></i>Proveedores</x-sidebar-link>@endcan
                         @can('viewAny', \App\Models\Purchase::class)<x-sidebar-link :href="route('purchases.index')" :active="request()->routeIs('purchases.*', 'receptions.*')" wire:navigate><i class="bi bi-bag-check w-5 text-center"></i>Compras</x-sidebar-link>@endcan
+                        @can('returns.view')<x-sidebar-link :href="route('returns.index', ['type' => 'supplier'])" :active="request()->routeIs('returns.index') && request('type') === 'supplier'" wire:navigate><i class="bi bi-arrow-return-left w-5 text-center"></i>Devoluciones a proveedor</x-sidebar-link>@endcan
                     </x-sidebar-group>
-                    <x-sidebar-group title="Ventas" icon="bi-cart-check" :active="request()->routeIs('customers.*', 'sales.*', 'quotations.*', 'credits.*')">
+                    <x-sidebar-group title="Ventas" icon="bi-cart-check" :active="request()->routeIs('customers.*', 'sales.*', 'quotations.*', 'credits.*') || (request()->routeIs('returns.index') && request('type') !== 'supplier')">
                         @can('viewAny', \App\Models\Customer::class)<x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')" wire:navigate><i class="bi bi-people w-5 text-center"></i>Clientes</x-sidebar-link>@endcan
                         @can('viewAny', \App\Models\Sale::class)<x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')" wire:navigate><i class="bi bi-cart-check w-5 text-center"></i>Ventas</x-sidebar-link>@endcan
                         @can('viewAny', \App\Models\Quotation::class)<x-sidebar-link :href="route('quotations.index')" :active="request()->routeIs('quotations.*')" wire:navigate><i class="bi bi-file-earmark-text w-5 text-center"></i>Cotizaciones</x-sidebar-link>@endcan
                         @can('viewAny', \App\Models\Credit::class)<x-sidebar-link :href="route('credits.index')" :active="request()->routeIs('credits.*')" wire:navigate><i class="bi bi-credit-card w-5 text-center"></i>Créditos</x-sidebar-link>@endcan
+                        @can('returns.view')<x-sidebar-link :href="route('returns.index', ['type' => 'customer'])" :active="request()->routeIs('returns.index') && request('type') !== 'supplier'" wire:navigate><i class="bi bi-arrow-return-left w-5 text-center"></i>Devoluciones de cliente</x-sidebar-link>@endcan
                     </x-sidebar-group>
                     <x-sidebar-group title="Caja" icon="bi-cash-stack" :active="request()->routeIs('cash.*')">
                         @can('viewAny', \App\Models\CashSession::class)<x-sidebar-link :href="route('cash.index')" :active="request()->routeIs('cash.index')" wire:navigate><i class="bi bi-cash-stack w-5 text-center"></i>Caja</x-sidebar-link><x-sidebar-link :href="route('cash.sessions.index')" :active="request()->routeIs('cash.sessions.*')" wire:navigate><i class="bi bi-clock-history w-5 text-center"></i>Historial de caja</x-sidebar-link>@endcan
@@ -54,6 +56,11 @@
                         @can('create', \App\Models\Product::class)<x-sidebar-link :href="route('products.import')" :active="request()->routeIs('products.import')" wire:navigate><i class="bi bi-file-earmark-arrow-up w-5 text-center"></i>Carga masiva</x-sidebar-link>@endcan
                         @can('reports.view')<x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.*')" wire:navigate><i class="bi bi-file-earmark-bar-graph w-5 text-center"></i>Reportes</x-sidebar-link>@endcan
                     </x-sidebar-group>
+                    @can('viewAny', \App\Models\User::class)
+                        <x-sidebar-group title="Administración" icon="bi-shield-lock" :active="request()->routeIs('users.*')">
+                            <x-sidebar-link :href="route('users.index')" :active="request()->routeIs('users.*')" wire:navigate><i class="bi bi-people w-5 text-center"></i>Usuarios</x-sidebar-link>
+                        </x-sidebar-group>
+                    @endcan
                 </nav>
             </aside>
             <div class="min-w-0 lg:pl-72">

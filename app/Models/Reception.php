@@ -39,6 +39,11 @@ class Reception extends Model
         return $this->hasMany(ReceptionItem::class);
     }
 
+    public function supplierReturns(): HasMany
+    {
+        return $this->hasMany(SupplierReturn::class);
+    }
+
     public function attachments(): HasMany
     {
         return $this->hasMany(ReceptionAttachment::class);

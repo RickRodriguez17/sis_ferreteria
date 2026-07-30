@@ -64,6 +64,11 @@ class Sale extends Model
         return $this->hasMany(SaleItem::class);
     }
 
+    public function customerReturns(): HasMany
+    {
+        return $this->hasMany(CustomerReturn::class);
+    }
+
     /** @return HasOne<Credit, $this> */
     public function credit(): HasOne
     {

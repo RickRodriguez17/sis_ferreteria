@@ -40,7 +40,12 @@ class CreditService
             $method = $method instanceof PaymentMethod ? $method : PaymentMethod::from($method);
             $paid = bcadd((string) $credit->paid_amount, (string) $amount, 2);
             $balance = bcsub((string) $credit->original_amount, $paid, 2);
-            $credit->update(['paid_amount' => $paid, 'balance' => $balance, 'status' => bccomp($balance, '0', 2) === 0 ? CreditStatus::Paid : CreditStatus::Partial]);
+            $status = bccomp($balance, '0', 2) === 0
+                ? ($credit->hasPendingPriceItems()
+                    ? (bccomp((string) $credit->original_amount, '0', 2) === 0 ? CreditStatus::Open : CreditStatus::Partial)
+                    : CreditStatus::Paid)
+                : CreditStatus::Partial;
+            $credit->update(['paid_amount' => $paid, 'balance' => $balance, 'status' => $status]);
             $payment = $credit->payments()->create(['amount' => $amount, 'method' => $method, 'cash_session_id' => $cashSession?->id, 'paid_at' => $paidAt ?? now(), 'notes' => $notes, 'created_by' => auth()->id()]);
             if ($cashSession) {
                 CashMovement::create(['cash_session_id' => $cashSession->id, 'type' => CashMovementType::CreditPayment, 'method' => $method, 'payment_account_id' => $account?->id, 'amount' => $amount, 'reference_type' => $payment->getMorphClass(), 'reference_id' => $payment->id, 'created_by' => auth()->id()]);
@@ -71,10 +76,15 @@ class CreditService
 
             $original = bcsub((string) $credit->original_amount, (string) $amount, 2);
             $balance = bcsub((string) $credit->balance, (string) $amount, 2);
+            $status = bccomp($balance, '0', 2) === 0
+                ? ($credit->hasPendingPriceItems()
+                    ? (bccomp((string) $credit->original_amount, '0', 2) === 0 ? CreditStatus::Open : CreditStatus::Partial)
+                    : CreditStatus::Paid)
+                : $credit->status;
             $credit->update([
                 'original_amount' => max('0.00', $original),
                 'balance' => max('0.00', $balance),
-                'status' => bccomp($balance, '0', 2) === 0 ? CreditStatus::Paid : $credit->status,
+                'status' => $status,
             ]);
 
             return $credit->fresh();

@@ -44,7 +44,7 @@ class SaleIndex extends Component
 
     public function render()
     {
-        $sales = Sale::query()->with('customer:id,name')->withCount('items')->when($this->search !== '', fn ($q) => $q->where('code', 'like', '%'.$this->search.'%'))->when($this->status !== '', fn ($q) => $q->where('status', $this->status))->when($this->customerId !== '', fn ($q) => $q->where('customer_id', $this->customerId))->when($this->from !== '', fn ($q) => $q->whereDate('created_at', '>=', $this->from))->when($this->to !== '', fn ($q) => $q->whereDate('created_at', '<=', $this->to))->when($this->withInvoice !== '', fn ($q) => $q->where('with_invoice', $this->withInvoice === 'yes'))->latest()->paginate($this->perPage);
+        $sales = Sale::query()->with('customer:id,name')->withCount(['items', 'items as pending_price_items_count' => fn ($query) => $query->where('price_pending', true)])->when($this->search !== '', fn ($q) => $q->where('code', 'like', '%'.$this->search.'%'))->when($this->status !== '', fn ($q) => $q->where('status', $this->status))->when($this->customerId !== '', fn ($q) => $q->where('customer_id', $this->customerId))->when($this->from !== '', fn ($q) => $q->whereDate('created_at', '>=', $this->from))->when($this->to !== '', fn ($q) => $q->whereDate('created_at', '<=', $this->to))->when($this->withInvoice !== '', fn ($q) => $q->where('with_invoice', $this->withInvoice === 'yes'))->latest()->paginate($this->perPage);
 
         return view('livewire.sale-index', ['sales' => $sales, 'customers' => Customer::query()->active()->orderBy('name')->get(['id', 'name']), 'statuses' => SaleStatus::cases()])->layout('layouts.app');
     }

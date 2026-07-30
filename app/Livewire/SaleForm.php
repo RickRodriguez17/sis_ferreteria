@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Services\SaleService;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Throwable;
@@ -64,6 +65,7 @@ class SaleForm extends Component
             'quantity' => '1',
             'unit_price' => (string) $price,
             'subtotal' => (string) $price,
+            'price_pending' => false,
         ];
         $this->productSearch = '';
     }
@@ -97,9 +99,24 @@ class SaleForm extends Component
         $this->recalculate();
     }
 
+    public function updatedItemsPricePending(mixed $value = null, ?string $key = null): void
+    {
+        $this->recalculate();
+    }
+
     public function updatedDiscount(): void
     {
         $this->discount = max(0, (float) $this->discount).'';
+    }
+
+    public function updatedPaymentType(): void
+    {
+        if ($this->paymentType !== 'credit') {
+            foreach ($this->items as $index => $item) {
+                $this->items[$index]['price_pending'] = false;
+            }
+            $this->recalculate();
+        }
     }
 
     public function selectCustomer(int $id): void
@@ -128,10 +145,25 @@ class SaleForm extends Component
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.presentation_id' => ['required', 'exists:presentations,id'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
+            'items.*.price_pending' => ['boolean'],
         ]);
 
-        $subtotal = collect($this->items)->sum('subtotal');
+        foreach ($this->items as $index => $item) {
+            $pending = (bool) ($item['price_pending'] ?? false);
+            if ($pending && $this->paymentType !== 'credit') {
+                $this->addError("items.{$index}.price_pending", 'El precio pendiente solo está permitido en ventas a crédito.');
+
+                return;
+            }
+            if (! $pending && (! isset($item['unit_price']) || $item['unit_price'] === '')) {
+                $this->addError("items.{$index}.unit_price", 'El precio es obligatorio cuando la línea no está pendiente.');
+
+                return;
+            }
+        }
+
+        $subtotal = collect($this->items)->sum(fn (array $item): float => (bool) ($item['price_pending'] ?? false) ? 0 : (float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0));
         if ((float) $this->discount > (float) $subtotal) {
             $this->addError('discount', 'El descuento no puede superar el subtotal.');
 
@@ -157,7 +189,8 @@ class SaleForm extends Component
             'quantity' => $item['quantity'],
             'base_quantity' => 0,
             'unit_price' => $item['unit_price'],
-            'subtotal' => (float) $item['quantity'] * (float) $item['unit_price'],
+            'subtotal' => (bool) ($item['price_pending'] ?? false) ? 0 : (float) $item['quantity'] * (float) $item['unit_price'],
+            'price_pending' => (bool) ($item['price_pending'] ?? false),
         ], $this->items);
 
         try {
@@ -178,6 +211,10 @@ class SaleForm extends Component
             return;
         } catch (InsufficientStockException) {
             $this->addError('items', 'No hay existencias suficientes para completar la venta.');
+
+            return;
+        } catch (InvalidArgumentException $exception) {
+            $this->addError('items', $exception->getMessage());
 
             return;
         } catch (Throwable) {
@@ -214,7 +251,9 @@ class SaleForm extends Component
     private function recalculate(): void
     {
         foreach ($this->items as $index => $item) {
-            $this->items[$index]['subtotal'] = number_format((float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0), 2, '.', '');
+            $this->items[$index]['subtotal'] = (bool) ($item['price_pending'] ?? false)
+                ? '0.00'
+                : number_format((float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0), 2, '.', '');
         }
     }
 }

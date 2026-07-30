@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property-read int $days_overdue
+ */
 class Credit extends Model
 {
     use Auditable, HasFactory;
@@ -43,6 +46,18 @@ class Credit extends Model
         return Attribute::get(fn (): bool => $this->status !== CreditStatus::Cancelled
             && ($this->status === CreditStatus::Overdue
                 || ($this->balance > 0 && $this->due_date instanceof Carbon && $this->due_date->isPast())));
+    }
+
+    public function hasPendingPriceItems(): bool
+    {
+        return $this->sale()->whereHas('items', fn ($query) => $query->where('price_pending', true))->exists();
+    }
+
+    protected function daysOverdue(): Attribute
+    {
+        return Attribute::get(fn (): int => $this->balance > 0 && $this->due_date instanceof Carbon && $this->due_date->isPast()
+            ? (int) $this->due_date->diffInDays(today())
+            : 0);
     }
 
     public function scopeOverdue($query)

@@ -10,7 +10,7 @@
     <h2>Cliente</h2>
     <p>{{ $sale->customer?->name ?: 'Cliente ocasional' }}<br>{{ $sale->customer?->document_number ?: 'Sin documento' }}</p>
     <table><thead><tr><th>Producto</th><th>Presentación</th><th>Cantidad</th><th>Precio</th><th class="right">Subtotal</th></tr></thead><tbody>
-    @foreach($sale->items as $item)<tr><td>{{ $item->product->name }}</td><td>{{ $item->presentation?->name ?: 'Unidad' }}</td><td>{{ $item->quantity }}</td><td>{{ $company->money($item->unit_price) }}</td><td class="right">{{ $company->money($item->subtotal) }}</td></tr>@endforeach
+    @foreach($sale->items as $item)<tr><td>{{ $item->product->name }}</td><td>{{ $item->presentation?->name ?: 'Unidad' }}</td><td>{{ qty($item->quantity) }}</td><td>{{ $company->money($item->unit_price) }}</td><td class="right">{{ $company->money($item->subtotal) }}</td></tr>@endforeach
     </tbody></table>
     <p class="right">Subtotal: {{ $company->money($sale->subtotal) }}<br>Descuento: {{ $company->money($sale->discount) }}<br><strong>Total: {{ $company->money($sale->total) }}</strong></p>
     <p class="muted">{{ $company->saleFooter() }}</p>

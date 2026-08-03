@@ -11,4 +11,17 @@ enum StockMovementType: string
     case Adjustment = 'adjustment';
     case CustomerReturn = 'customer_return';
     case SupplierReturn = 'supplier_return';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PurchaseReception => 'Recepción de compra',
+            self::Sale => 'Venta',
+            self::TransferIn => 'Transferencia de entrada',
+            self::TransferOut => 'Transferencia de salida',
+            self::Adjustment => 'Ajuste',
+            self::CustomerReturn => 'Devolución de cliente',
+            self::SupplierReturn => 'Devolución a proveedor',
+        };
+    }
 }

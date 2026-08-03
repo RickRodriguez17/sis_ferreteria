@@ -8,4 +8,14 @@ enum QuotationStatus: string
     case Converted = 'converted';
     case Expired = 'expired';
     case Cancelled = 'cancelled';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Open => 'Abierta',
+            self::Converted => 'Convertida',
+            self::Expired => 'Vencida',
+            self::Cancelled => 'Cancelada',
+        };
+    }
 }

@@ -10,7 +10,7 @@
         <x-table-toolbar wire:model.live.debounce.300ms="search">
             <select wire:model.live="type" class="rounded-lg border-slate-300 text-sm">
                 <option value="">Todos los tipos</option>
-                @foreach($types as $item)<option value="{{ $item->value }}">{{ $item->value === 'registered' ? 'Registrados' : 'Ocasionales' }}</option>@endforeach
+                @foreach($types as $item)<option value="{{ $item->value }}">{{ $item->label() }}</option>@endforeach
             </select>
             <select wire:model.live="credit" class="rounded-lg border-slate-300 text-sm">
                 <option value="">Todos</option>
@@ -32,8 +32,8 @@
                             <td class="px-3 py-3"><a href="{{ route('customers.show', $customer) }}" class="font-medium text-indigo-600">{{ $customer->name }}</a></td>
                             <td class="px-3 py-3">{{ $customer->document_number ?: 'Sin documento' }}</td>
                             <td class="px-3 py-3">{{ $customer->phone ?: $customer->email ?: '—' }}</td>
-                            <td class="px-3 py-3">{{ $customer->type->value === 'registered' ? 'Registrado' : 'Ocasional' }}</td>
-                            <td class="px-3 py-3">{{ number_format((float) ($customer->credit_limit ?? 0), 2) }}</td>
+                            <td class="px-3 py-3">{{ $customer->type->label() }}</td>
+                            <td class="px-3 py-3">{{ money((float) ($customer->credit_limit ?? 0)) }}</td>
                             <td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-xs {{ $customer->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ $customer->is_active ? 'Activo' : 'Inactivo' }}</span></td>
                             <td class="px-3 py-3 text-right">
                                 <a href="{{ route('customers.show', $customer) }}" class="text-slate-600">Ver</a>

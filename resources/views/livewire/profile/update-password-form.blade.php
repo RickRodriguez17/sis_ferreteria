@@ -63,7 +63,7 @@ new class extends Component
         </div>
 
         <div>
-            <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
+            <x-input-label for="update_password_password_confirmation" :value="__('Confirmar contraseña')" />
             <x-text-input wire:model="password_confirmation" id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
@@ -72,7 +72,7 @@ new class extends Component
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             <x-action-message class="me-3" on="password-updated">
-                {{ __('Saved.') }}
+                {{ __('Guardado.') }}
             </x-action-message>
         </div>
     </form>

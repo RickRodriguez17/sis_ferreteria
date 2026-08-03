@@ -10,7 +10,7 @@
     <h2>Cliente</h2>
     <p>{{ $quotation->customer?->name ?: 'Cliente ocasional' }}<br>{{ $quotation->customer?->document_number ?: 'Sin documento' }}</p>
     <table><thead><tr><th>Producto</th><th>Presentación</th><th>Cantidad</th><th>Precio</th><th class="right">Subtotal</th></tr></thead><tbody>
-    @foreach($quotation->items as $item)<tr><td>{{ $item->product->name }}</td><td>{{ $item->presentation?->name ?: 'Unidad' }}</td><td>{{ $item->quantity }}</td><td>{{ $company->money($item->unit_price) }}</td><td class="right">{{ $company->money($item->subtotal) }}</td></tr>@endforeach
+    @foreach($quotation->items as $item)<tr><td>{{ $item->product->name }}</td><td>{{ $item->presentation?->name ?: 'Unidad' }}</td><td>{{ qty($item->quantity) }}</td><td>{{ $company->money($item->unit_price) }}</td><td class="right">{{ $company->money($item->subtotal) }}</td></tr>@endforeach
     </tbody></table>
     <p class="right">Subtotal: {{ $company->money($quotation->subtotal) }}<br><strong>Total: {{ $company->money($quotation->total) }}</strong></p>
     <p class="muted">{{ $company->quotationFooter() }}</p>

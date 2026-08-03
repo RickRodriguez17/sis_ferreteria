@@ -30,7 +30,7 @@
                     <thead class="border-b text-xs uppercase text-slate-500"><tr><th class="px-3 py-3">Producto</th><th class="px-3 py-3">Pedido</th><th class="px-3 py-3">Recibido</th><th class="px-3 py-3">Pendiente</th><th class="px-3 py-3">Costo</th></tr></thead>
                     <tbody class="divide-y divide-slate-100">
                         @foreach($purchase->items as $item)
-                            <tr><td class="px-3 py-3 font-medium">{{ $item->product->name }}</td><td class="px-3 py-3">{{ $item->quantity_ordered }}</td><td class="px-3 py-3">{{ $item->quantity_received }}</td><td class="px-3 py-3">{{ bcsub((string) $item->quantity_ordered, (string) $item->quantity_received, 4) }}</td><td class="px-3 py-3">{{ $item->unit_cost }}</td></tr>
+                            <tr><td class="px-3 py-3 font-medium">{{ $item->product->name }}</td><td class="px-3 py-3">{{ qty($item->quantity_ordered) }}</td><td class="px-3 py-3">{{ qty($item->quantity_received) }}</td><td class="px-3 py-3">{{ qty(bcsub((string) $item->quantity_ordered, (string) $item->quantity_received, 4)) }}</td><td class="px-3 py-3">{{ money($item->unit_cost) }}</td></tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -38,9 +38,9 @@
         </section>
         <aside class="rounded-xl bg-white p-6 shadow-sm">
             <h2 class="font-semibold">Resumen</h2>
-            <p class="mt-4 text-sm">Estado: <span class="rounded-full bg-indigo-100 px-2 py-1 text-xs text-indigo-700">{{ $purchase->status->name }}</span></p>
-            <p class="mt-4 text-2xl font-bold">{{ $purchase->total }}</p>
-            <p class="text-sm text-slate-500">{{ $purchase->payment_type->name }}</p>
+            <p class="mt-4 text-sm">Estado: <span class="rounded-full bg-indigo-100 px-2 py-1 text-xs text-indigo-700">{{ $purchase->status->label() }}</span></p>
+            <p class="mt-4 text-2xl font-bold">{{ money($purchase->total) }}</p>
+            <p class="text-sm text-slate-500">{{ $purchase->payment_type->label() }}</p>
         </aside>
     </div>
 
@@ -53,10 +53,10 @@
             <div class="mt-5 space-y-6">
                 @foreach($this->receivedProducts() as $product)
                     <div wire:key="received-product-{{ $product->id }}" class="rounded-lg border border-slate-200 p-4">
-                        <div class="flex flex-wrap items-center justify-between gap-3"><div><h3 class="font-medium">{{ $product->name }}</h3><p class="text-xs text-slate-500">Costo actual: {{ number_format((float) $product->cost, 4) }}</p></div><div class="w-40"><x-input-label value="Margen del producto"/><x-text-input type="number" step="0.01" min="0" max="10" wire:model.live="productMargins.{{ $product->id }}" class="mt-1 w-full"/></div></div>
+                        <div class="flex flex-wrap items-center justify-between gap-3"><div><h3 class="font-medium">{{ $product->name }}</h3><p class="text-xs text-slate-500">Costo actual: {{ money($product->cost) }}</p></div><div class="w-40"><x-input-label value="Margen del producto"/><x-text-input type="number" step="0.01" min="0" max="10" wire:model.live="productMargins.{{ $product->id }}" class="mt-1 w-full"/></div></div>
                         <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b text-xs uppercase text-slate-500"><tr><th class="px-3 py-2">Presentación</th><th class="px-3 py-2">Sin factura</th><th class="px-3 py-2">Con factura</th><th class="px-3 py-2">Sugerido</th><th class="px-3 py-2">Aplicar</th></tr></thead><tbody class="divide-y divide-slate-100">
                             @foreach($product->presentations as $presentation)
-                                <tr><td class="px-3 py-3 font-medium">{{ $presentation->name }}</td><td class="px-3 py-3">{{ $presentation->price_without_invoice }}</td><td class="px-3 py-3">{{ $presentation->price_with_invoice }}</td><td class="px-3 py-3 font-semibold text-indigo-700">{{ $this->suggestedPrice($product, $product->id) }}</td><td class="px-3 py-3">@if($this->canApplyPrices())<div class="flex flex-wrap gap-2"><button wire:click="applySuggestedPrice({{ $presentation->id }}, 'price_without_invoice', {{ $product->id }})" class="rounded bg-indigo-600 px-2 py-1 text-xs text-white">Sin factura</button><button wire:click="applySuggestedPrice({{ $presentation->id }}, 'price_with_invoice', {{ $product->id }})" class="rounded bg-indigo-600 px-2 py-1 text-xs text-white">Con factura</button></div>@else<span class="text-xs text-slate-400">Solo Admin/Gerente</span>@endif</td></tr>
+                                <tr><td class="px-3 py-3 font-medium">{{ $presentation->name }}</td><td class="px-3 py-3">{{ money($presentation->price_without_invoice) }}</td><td class="px-3 py-3">{{ money($presentation->price_with_invoice) }}</td><td class="px-3 py-3 font-semibold text-indigo-700">{{ money($this->suggestedPrice($product, $product->id)) }}</td><td class="px-3 py-3">@if($this->canApplyPrices())<div class="flex flex-wrap gap-2"><button wire:click="applySuggestedPrice({{ $presentation->id }}, 'price_without_invoice', {{ $product->id }})" class="rounded bg-indigo-600 px-2 py-1 text-xs text-white">Sin factura</button><button wire:click="applySuggestedPrice({{ $presentation->id }}, 'price_with_invoice', {{ $product->id }})" class="rounded bg-indigo-600 px-2 py-1 text-xs text-white">Con factura</button></div>@else<span class="text-xs text-slate-400">Solo Admin/Gerente</span>@endif</td></tr>
                             @endforeach
                         </tbody></table></div>
                     </div>
@@ -66,5 +66,5 @@
         </section>
     @endif
 
-    <div class="mt-6 rounded-xl bg-white p-6 shadow-sm"><h2 class="font-semibold">Recepciones</h2><div class="mt-4 space-y-3">@forelse($purchase->receptions as $reception)<div class="rounded-lg bg-slate-50 p-4"><div class="flex justify-between"><span class="font-medium">{{ $reception->code }}</span><span>{{ $reception->destination->name }} · {{ $reception->location->name }}</span></div><p class="mt-1 text-sm text-slate-500">{{ $reception->received_at?->format('d/m/Y H:i') }} · {{ $reception->attachments->count() }} adjunto(s)</p></div>@empty<p class="py-6 text-sm text-slate-500">No hay recepciones todavía.</p>@endforelse</div></div>
+    <div class="mt-6 rounded-xl bg-white p-6 shadow-sm"><h2 class="font-semibold">Recepciones</h2><div class="mt-4 space-y-3">@forelse($purchase->receptions as $reception)<div class="rounded-lg bg-slate-50 p-4"><div class="flex justify-between"><span class="font-medium">{{ $reception->code }}</span><span>{{ $reception->destination->label() }} · {{ $reception->location->name }}</span></div><p class="mt-1 text-sm text-slate-500">{{ $reception->received_at?->format('d/m/Y H:i') }} · {{ $reception->attachments->count() }} adjunto(s)</p></div>@empty<p class="py-6 text-sm text-slate-500">No hay recepciones todavía.</p>@endforelse</div></div>
 </div>

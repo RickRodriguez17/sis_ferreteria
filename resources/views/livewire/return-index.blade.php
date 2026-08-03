@@ -13,7 +13,7 @@
         </x-table-toolbar>
         <div class="mt-5 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b text-xs uppercase text-slate-500"><tr><th class="px-3 py-3">Documento</th><th class="px-3 py-3">Origen</th><th class="px-3 py-3">Tercero</th><th class="px-3 py-3">Fecha</th><th class="px-3 py-3 text-right">Total</th></tr></thead><tbody class="divide-y divide-slate-100">
             @forelse($returns as $return)
-                <tr><td class="px-3 py-3 font-medium">{{ $return->code }}</td><td class="px-3 py-3">{{ $type === 'supplier' ? $return->reception?->code : $return->sale?->code }}</td><td class="px-3 py-3">{{ $type === 'supplier' ? $return->supplier?->name : ($return->customer?->name ?: 'Cliente ocasional') }}</td><td class="px-3 py-3">{{ $return->returned_at?->format('d/m/Y H:i') }}</td><td class="px-3 py-3 text-right">{{ number_format((float) $return->total, 2) }}</td></tr>
+                <tr><td class="px-3 py-3 font-medium">{{ $return->code }}</td><td class="px-3 py-3">{{ $type === 'supplier' ? $return->reception?->code : $return->sale?->code }}</td><td class="px-3 py-3">{{ $type === 'supplier' ? $return->supplier?->name : ($return->customer?->name ?: 'Cliente ocasional') }}</td><td class="px-3 py-3">{{ $return->returned_at?->format('d/m/Y H:i') }}</td><td class="px-3 py-3 text-right">{{ money((float) $return->total) }}</td></tr>
             @empty
                 <tr><td colspan="5" class="px-3 py-12 text-center text-slate-500">No hay devoluciones para los filtros seleccionados.</td></tr>
             @endforelse

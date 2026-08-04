@@ -57,6 +57,17 @@ npm run build
 
 `migrate:fresh` elimina tablas existentes: úselo solo en instalaciones nuevas o pruebas. En producción con datos use `php artisan migrate --force`.
 
+### Datos reales para pruebas
+
+`--seed` carga datos de demostración (productos `DEMO-*` y ventas de ejemplo) usados por las pruebas automatizadas. Para una **prueba real** con un catálogo de ferretería (cemento, fierro, PVC, pinturas, herramientas, etc.), stock inicial en el depósito, proveedores y clientes bolivianos, limpie la base y cargue el seeder real:
+
+```bash
+php artisan migrate:fresh --force
+php artisan db:seed --class="Database\Seeders\RealDatabaseSeeder" --force
+```
+
+Esto crea 40 productos con precios en Bs, existencias iniciales (vía recepción, con Kardex), 3 proveedores y 4 clientes (incluidos clientes con límite de crédito). La caja queda creada pero cerrada: ábrala desde **Caja** para registrar ventas al contado.
+
 Para desarrollo:
 
 ```bash

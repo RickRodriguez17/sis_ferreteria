@@ -22,7 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (! function_exists('money')) {
+            require_once __DIR__.'/../Support/helpers.php';
+        }
     }
 
     /**
